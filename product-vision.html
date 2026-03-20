@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beefy — Vision</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #09090b; color: #a1a1aa;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px; line-height: 1.7;
+  }
+  code { font-family: 'SF Mono','Fira Code','Menlo',monospace; }
+
+  /* Tabs */
+  .tabs { position:sticky;top:0;z-index:100;background:#09090b;border-bottom:1px solid #1c1c22;display:flex;padding:0 48px; }
+  .tab { padding:14px 24px;font-size:13px;font-weight:500;color:#52525b;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;user-select:none; }
+  .tab:hover { color:#a1a1aa; }
+  .tab.active { color:#e4e4e7;border-bottom-color:#d4a054; }
+  .page { display:none; }
+  .page.active { display:block; }
+
+  .visual { padding:48px 48px 96px;max-width:1000px;margin:0 auto; }
+  .vis-section { margin-bottom:96px; }
+  .vis-label { font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#3f3f46;margin-bottom:10px; }
+  .vis-title { font-size:24px;font-weight:700;color:#fafafa;margin-bottom:6px;letter-spacing:-0.3px; }
+  .vis-sub { font-size:14px;color:#52525b;margin-bottom:32px;max-width:560px; }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ═══ PROBLEM ═══ */
+  .problem-scene { background:#0a0a0e;border:1px solid #18181b;border-radius:14px;padding:36px 40px 32px; }
+  .terminals {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:auto auto;
+    gap:10px 14px;
+  }
+  .terminals .term-status-label { align-self:end; }
+  .terminals .term { align-self:start; }
+
+  /* Terminal window — what you'd see if you SSH'd in */
+  .term { background:#111114;border:1px solid #1c1c22;border-radius:8px;overflow:hidden; }
+  .term-bar { height:24px;background:#141418;border-bottom:1px solid #1c1c22;display:flex;align-items:center;padding:0 10px;gap:5px; }
+  .term-dot { width:6px;height:6px;border-radius:50%;background:#27272a; }
+  .term-name { font-size:9px;color:#71717a;margin-left:6px;font-family:'SF Mono',monospace; }
+  .term-body { padding:10px 14px;font-family:'SF Mono',monospace;font-size:9.5px;line-height:1.6;color:#3f3f46;height:90px; }
+  .t-error{color:#6b2020;} .t-waiting{color:#6b4a10;} .t-ok{color:#1a4a24;} .t-prompt{color:#3f3f46;}
+
+  /* Status label — analysis, not system output */
+  .term-status-label {
+    padding:8px 14px;
+    border-radius:6px;
+    font-size:12px;
+    font-style:italic;
+    line-height:1.4;
+  }
+  .tsl-red { color:#e08080;background:rgba(127,29,29,0.08); }
+  .tsl-amber { color:#d4a050;background:rgba(146,64,14,0.08); }
+  .tsl-green { color:#70b090;background:rgba(26,58,36,0.1); }
+
+  .problem-footer {
+    text-align:center;margin-top:20px;
+    font-size:13px;color:#e4e4e7;
+  }
+
+  /* ═══ SOLUTION ═══ */
+  .solution-scene { background:#0a0a0e;border:1px solid #18181b;border-radius:14px;padding:36px 40px 32px; }
+
+  /* Diagram title */
+  .diagram-title {
+    font-size:15px;font-weight:600;color:#e4e4e7;
+    margin-bottom:24px;padding-bottom:16px;
+    border-bottom:1px solid #1c1c22;
+  }
+
+  /* Flow: agents → beefyd → dashboard */
+  .sol-flow {
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    gap:0;align-items:stretch;
+  }
+  .sol-col {
+    display:flex;flex-direction:column;
+  }
+  .sol-col-content {
+    flex:1;display:flex;flex-direction:column;justify-content:stretch;
+  }
+  .sol-col-content.sol-raw { gap:6px; }
+  .sol-col-content.sol-raw .raw-agent { flex:1; }
+  .sol-col-content.sol-dashboard { gap:4px; }
+  .sol-col-content.sol-dashboard .dash-row { flex:1; }
+
+  /* Column headers — same height */
+  .col-header {
+    font-size:12px;font-weight:600;color:#71717a;
+    margin-bottom:12px;letter-spacing:0.3px;
+    min-height:20px;
+  }
+  .col-header-right {
+    font-size:12px;font-weight:600;color:#d4a054;
+    margin-bottom:12px;letter-spacing:0.3px;
+    min-height:20px;
+  }
+
+  /* Left: raw agent output */
+  .sol-raw {
+    display:flex;flex-direction:column;gap:6px;
+  }
+  .raw-agent {
+    background:#111114;border:1px solid #1c1c22;border-radius:6px;
+    padding:10px 14px;
+    font-family:'SF Mono',monospace;font-size:9.5px;
+    color:#27272a;line-height:1.5;
+  }
+  .raw-agent .ra-name {
+    font-size:10px;font-weight:600;color:#3f3f46;margin-bottom:4px;
+  }
+  .raw-agent .ra-line { color:#27272a; }
+  .raw-agent .ra-error { color:#5c1a1a; }
+  .raw-agent .ra-question { color:#5c3a0a; }
+
+  /* Center: beefyd */
+  .sol-center {
+    display:flex;align-items:center;justify-content:center;
+    padding:0 12px;
+    margin-top:20px;
+  }
+  .sol-arrow {
+    color:#3f3f46;font-size:18px;
+  }
+  .sol-arrow-out {
+    color:#d4a054;font-size:18px;
+  }
+  .sol-daemon {
+    width:96px;height:96px;border-radius:50%;
+    background:radial-gradient(circle at 40% 40%,#1a150d,#100d08);
+    border:2px solid #d4a054;
+    display:flex;align-items:center;justify-content:center;
+    flex-direction:column;flex-shrink:0;
+    box-shadow:0 0 50px rgba(212,160,84,0.06);
+  }
+  .sol-daemon .sd-name {
+    font-size:11px;font-weight:700;color:#d4a054;
+    font-family:'SF Mono',monospace;
+  }
+  .sol-daemon .sd-role {
+    font-size:7px;color:#8a7040;text-transform:uppercase;
+    letter-spacing:1.2px;margin-top:2px;text-align:center;
+  }
+
+  /* Right: dashboard */
+  .sol-dashboard {
+    display:flex;flex-direction:column;gap:4px;
+  }
+  .dash-row {
+    display:grid;grid-template-columns:8px 1fr auto;
+    gap:10px;align-items:center;
+    padding:10px 14px;
+    background:#111114;border:1px solid #1c1c22;border-radius:6px;
+  }
+  .dash-dot { width:8px;height:8px;border-radius:50%; }
+  .dd-green { background:#4ade80; }
+  .dd-amber { background:#fbbf24;animation:pulse 2s infinite; }
+  .dd-red { background:#f87171;animation:pulse 1.5s infinite; }
+  .dd-idle { background:#6ee7b7;opacity:0.4; }
+  .dash-name { font-size:9px;font-weight:500;color:#3f3f46;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:1px; }
+  .dash-state { font-size:12px;font-weight:600;color:#e4e4e7; }
+  .dash-context { font-size:10px;color:#3f3f46;margin-top:2px; }
+  .dash-time {
+    font-size:10px;font-weight:600;
+    font-family:'SF Mono',monospace;
+  }
+  .dt-green { color:#166534; }
+  .dt-amber { color:#92400e; }
+  .dt-red { color:#991b1b; }
+  .dt-idle { color:#1a3a24; }
+
+  /* ═══ ROADMAP ═══ */
+  .rm-timeline { position:relative;padding-left:120px; }
+  .rm-timeline::before { content:'';position:absolute;left:52px;top:8px;bottom:8px;width:1px;background:#1c1c22; }
+
+  .rm-phase{position:relative;margin-bottom:32px;}
+  .rm-phase:last-child{margin-bottom:0;}
+  .rm-marker{position:absolute;left:-68px;top:2px;width:10px;height:10px;border-radius:50%;border:2px solid #d4a054;background:#09090b;z-index:2;}
+  .rm-marker-dim{border-color:#3f3f46;}
+  .rm-marker-empty{border-style:dashed;border-color:#27272a;}
+  .rm-version{position:absolute;left:-120px;top:0;font-size:11px;font-weight:600;color:#3f3f46;text-align:right;width:44px;letter-spacing:0.5px;}
+  .rm-version-active{color:#d4a054;}
+  .rm-head{display:flex;align-items:baseline;gap:10px;margin-bottom:3px;}
+  .rm-name{font-size:15px;font-weight:700;color:#fafafa;}
+  .rm-layer{font-size:9px;color:#3f3f46;text-transform:uppercase;letter-spacing:1px;padding:1px 6px;border:1px solid #1c1c22;border-radius:3px;}
+  .rm-desc{font-size:13px;color:#71717a;margin-bottom:8px;max-width:560px;line-height:1.5;}
+  .rm-features{display:flex;flex-wrap:wrap;gap:5px;}
+  .rm-feat{font-size:11px;color:#52525b;background:#0e0e12;border:1px solid #1c1c22;padding:3px 10px;border-radius:4px;}
+
+  .rm-phase-future .rm-name{color:#3f3f46;}
+  .rm-phase-future .rm-desc{color:#27272a;font-style:italic;}
+
+  /* Version group label */
+  .rm-group{position:relative;margin-bottom:20px;margin-top:8px;}
+  .rm-group-label{position:absolute;left:-120px;font-size:12px;font-weight:700;color:#e4e4e7;text-align:right;width:44px;}
+  .rm-group-line{height:1px;background:#1c1c22;margin-left:0;}
+
+  .north-star-bar{margin-top:16px;text-align:center;font-size:11px;color:#3f3f46;}
+  .north-star-bar strong{color:#d4a054;}
+
+  /* ═══ STRATEGY TAB ═══ */
+  .strategy { padding:56px 48px 96px;max-width:700px;margin:0 auto; }
+  .strategy h1{font-size:24px;font-weight:700;color:#fafafa;margin-bottom:24px;letter-spacing:-0.3px;}
+  .strategy h2{font-size:17px;font-weight:600;color:#fafafa;margin-top:36px;margin-bottom:10px;}
+  .strategy p{margin-bottom:14px;font-size:14px;color:#a1a1aa;line-height:1.7;}
+  .strategy strong{color:#e4e4e7;}
+
+  .ladder{margin:24px 0;display:flex;flex-direction:column;gap:3px;}
+  .ladder-step{display:grid;grid-template-columns:80px 1fr;gap:16px;padding:12px 16px;background:#0e0e12;border:1px solid #1c1c22;border-radius:6px;align-items:start;}
+  .ladder-step .ls-label{font-size:12px;font-weight:700;color:#d4a054;}
+  .ladder-step .ls-text{font-size:13px;color:#a1a1aa;line-height:1.5;}
+  .ladder-step .ls-text strong{color:#e4e4e7;}
+
+  .strategy-note{margin-top:32px;padding:16px 20px;background:#0e0e12;border:1px solid #1c1c22;border-radius:8px;font-size:13px;color:#71717a;line-height:1.6;}
+  .strategy-note strong{color:#a1a1aa;}
+
+  /* ═══ STORY TAB ═══ */
+  .story-wrap{padding:56px 48px 96px;max-width:680px;margin:0 auto;}
+  .story-section{margin-bottom:72px;}
+  .story-section-label{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#3f3f46;margin-bottom:14px;}
+  .story-section h1{font-size:24px;font-weight:700;color:#fafafa;letter-spacing:-0.4px;margin-bottom:24px;line-height:1.3;}
+  .story-section p{margin-bottom:14px;font-size:15px;color:#a1a1aa;line-height:1.75;}
+  .story-section strong{color:#e4e4e7;font-weight:600;}
+  .story-section em{font-style:italic;}
+  .story-section code{font-size:14px;color:#d4a054;font-family:'SF Mono','Fira Code',monospace;}
+  .story-section .spacer{height:36px;}
+  .story-section .callout{font-size:15px;font-weight:500;color:#fafafa;margin:28px 0;line-height:1.75;}
+  .story-section ul{list-style:disc;margin:16px 0 20px;padding-left:20px;}
+  .story-section ul li{padding:3px 0;font-size:15px;color:#a1a1aa;line-height:1.75;}
+  .story-section ul li::marker{color:#52525b;}
+</style>
+</head>
+<body>
+
+<div class="tabs">
+  <div class="tab active" onclick="showPage('visual')">Visual</div>
+  <div class="tab" onclick="showPage('strategy')">Strategy</div>
+  <div class="tab" onclick="showPage('narrative')">Two Stories</div>
+  <div class="tab" onclick="showPage('k8s')">K8s Analogy</div>
+  <div class="tab" onclick="showPage('story')">Story</div>
+</div>
+
+<!-- ════════════════ VISUAL ════════════════ -->
+<div id="visual" class="page active">
+<div class="visual">
+
+  <!-- PROBLEM -->
+  <div class="vis-section">
+    <div class="vis-label">The Problem</div>
+    <div class="vis-title">You Don't Know When Your Agents Break</div>
+    <div class="vis-sub">Agents don't fail like servers — they fail silently. When a server breaks, you know immediately — CPU spikes, memory blows up, alerts fire. When an agent breaks, nothing happens — it just stops producing value.</div>
+
+    <div class="problem-scene">
+      <div class="diagram-title">Your agents can be stuck for hours, not working, and you have no way of knowing.</div>
+      <div class="terminals">
+        <!-- Row 1: status labels -->
+        <div class="term-status-label tsl-red">Stuck in a loop for 42 minutes, retrying the same error</div>
+        <div class="term-status-label tsl-amber">Waiting for a human reply for over 2 hours</div>
+        <div class="term-status-label tsl-green">Finished 3 hours ago, sitting idle since</div>
+
+        <!-- Row 2: terminals -->
+        <div class="term">
+          <div class="term-bar">
+            <div class="term-dot"></div><div class="term-dot"></div><div class="term-dot"></div>
+            <div class="term-name">agent — tests</div>
+          </div>
+          <div class="term-body">
+            <div class="t-error">✗ assertion failed: expected 200</div>
+            <div class="t-prompt">Retrying with different approach...</div>
+            <div class="t-error">✗ assertion failed: expected 200</div>
+            <div class="t-prompt">Retrying with different approach...</div>
+            <div class="t-error">✗ assertion failed: expected 200</div>
+          </div>
+        </div>
+        <div class="term">
+          <div class="term-bar">
+            <div class="term-dot"></div><div class="term-dot"></div><div class="term-dot"></div>
+            <div class="term-name">agent — auth</div>
+          </div>
+          <div class="term-body">
+            <div class="t-ok">✓ Updated auth middleware</div>
+            <div class="t-ok">✓ Added session handling</div>
+            <div>&nbsp;</div>
+            <div class="t-waiting">Should I update the database migration?</div>
+            <div class="t-prompt">❯ <span style="opacity:0.3">_</span></div>
+          </div>
+        </div>
+        <div class="term">
+          <div class="term-bar">
+            <div class="term-dot"></div><div class="term-dot"></div><div class="term-dot"></div>
+            <div class="term-name">agent — refactor</div>
+          </div>
+          <div class="term-body">
+            <div class="t-ok">✓ Refactored payment module</div>
+            <div class="t-ok">✓ Updated 12 files</div>
+            <div class="t-ok">✓ All tests passing</div>
+            <div>&nbsp;</div>
+            <div class="t-prompt">❯ <span style="opacity:0.3">_</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="problem-footer">You have to manually SSH into each agent to understand its real state.</div>
+    </div>
+  </div>
+
+  <!-- SOLUTION -->
+  <div class="vis-section">
+    <div class="vis-label">The Solution</div>
+    <div class="vis-title">Keep Every Agent Productive</div>
+    <div class="vis-sub"><code style="color:#d4a054">beefyd</code> runs alongside your agents, reads their output through an LLM, and keeps them productive. It detects when an agent is stuck, waiting, or idle — and surfaces what needs attention so nothing stays blocked.<br><br>With beefy, you stop babysitting agents. Every agent is either making progress — or you know exactly why it stopped.</div>
+
+    <div class="solution-scene">
+      <div class="diagram-title">All your agents in one place, prioritized by what needs attention.</div>
+      <div class="sol-flow">
+
+        <!-- Left: raw agent output -->
+        <div class="sol-col">
+          <div class="col-header">Raw output — requires SSH</div>
+          <div class="sol-col-content sol-raw">
+            <div class="raw-agent">
+              <div class="ra-name">tests</div>
+              <div class="ra-error">✗ assertion failed: expected 200</div>
+              <div class="ra-line">Retrying with different approach...</div>
+              <div class="ra-error">✗ assertion failed: expected 200</div>
+            </div>
+            <div class="raw-agent">
+              <div class="ra-name">auth</div>
+              <div class="ra-line">✓ Updated auth middleware</div>
+              <div class="ra-question">Should I update the migration?</div>
+              <div class="ra-line">❯ _</div>
+            </div>
+            <div class="raw-agent">
+              <div class="ra-name">refactor</div>
+              <div class="ra-line">✓ Refactored payment module</div>
+              <div class="ra-line">✓ All tests passing</div>
+              <div class="ra-line">❯ _</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Center: beefyd -->
+        <div class="sol-center">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <div class="sol-arrow">&rarr;</div>
+              <div class="sol-daemon">
+                <div class="sd-name">beefyd</div>
+              </div>
+              <div class="sol-arrow-out">&rarr;</div>
+            </div>
+            <div style="font-size:10px;color:#8a7040;text-transform:uppercase;letter-spacing:1px;text-align:center;">understands your agents</div>
+          </div>
+        </div>
+
+        <!-- Right: prioritized dashboard -->
+        <div class="sol-col">
+          <div class="col-header-right">Prioritized by what needs attention</div>
+          <div class="sol-col-content sol-dashboard">
+            <div class="dash-row">
+              <div class="dash-dot dd-red"></div>
+              <div class="dash-info">
+                <div class="dash-name">tests</div>
+                <div class="dash-state">Stuck in a loop</div>
+                <div class="dash-context">Same assertion failing repeatedly</div>
+              </div>
+              <div class="dash-time dt-red">42m</div>
+            </div>
+            <div class="dash-row">
+              <div class="dash-dot dd-amber"></div>
+              <div class="dash-info">
+                <div class="dash-name">auth</div>
+                <div class="dash-state">Waiting for input</div>
+                <div class="dash-context">"Should I update the migration?"</div>
+              </div>
+              <div class="dash-time dt-amber">2h 14m</div>
+            </div>
+            <div class="dash-row">
+              <div class="dash-dot dd-idle"></div>
+              <div class="dash-info">
+                <div class="dash-name">refactor</div>
+                <div class="dash-state">Finished, sitting idle</div>
+                <div class="dash-context">12 files updated, all tests passing</div>
+              </div>
+              <div class="dash-time dt-idle">3h</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- NORTH STAR -->
+  <div class="vis-section" style="margin-bottom:64px;">
+    <div style="background:#0f0d0a;border:1px solid #2a2010;border-radius:14px;padding:28px 36px;text-align:center;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:#d4a054;margin-bottom:8px;">North Star</div>
+      <div style="font-size:22px;font-weight:700;color:#fafafa;margin-bottom:8px;letter-spacing:-0.3px;">Every agent working at full capacity.</div>
+      <div style="font-size:14px;color:#71717a;max-width:480px;margin:0 auto;line-height:1.6;">Every minute an agent spends stuck, waiting, or sitting idle is wasted compute and lost progress. Everything beefy builds serves one metric: <strong style="color:#d4a054;">agent productive time</strong> — the percentage of time your agents make forward progress.</div>
+    </div>
+  </div>
+
+  <!-- VISION -->
+  <div class="vis-section">
+    <div class="vis-label">The Vision</div>
+    <div class="vis-title">From Tool to Infrastructure</div>
+    <div class="vis-sub">Three layers, built in order. Each one earns the right to the next.</div>
+
+    <div style="background:#0a0a0e;border:1px solid #18181b;border-radius:14px;padding:32px 36px;">
+
+      <!-- Three phases -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:3px;margin-bottom:24px;">
+        <div style="background:#0e0e12;border:1px solid #1c1c22;border-radius:8px;padding:18px 18px;">
+          <div style="font-size:13px;font-weight:700;color:#fafafa;margin-bottom:2px;">Monitor</div>
+          <div style="font-size:11px;color:#52525b;margin-bottom:10px;">See what every agent is doing</div>
+          <div style="font-size:12px;color:#71717a;line-height:1.5;">beefyd reads agent output and understands their real state. You know what's working, what's stuck, and what's waiting — without SSH.</div>
+        </div>
+        <div style="background:#0e0e12;border:1px solid #1c1c22;border-radius:8px;padding:18px 18px;">
+          <div style="font-size:13px;font-weight:700;color:#fafafa;margin-bottom:2px;">Control</div>
+          <div style="font-size:11px;color:#52525b;margin-bottom:10px;">Act on what you see</div>
+          <div style="font-size:12px;color:#71717a;line-height:1.5;">Respond to agents, approve permissions, unblock them — all without entering the session. Get notified when something needs attention.</div>
+        </div>
+        <div style="background:#0e0e12;border:1px solid #1c1c22;border-radius:8px;padding:18px 18px;">
+          <div style="font-size:13px;font-weight:700;color:#fafafa;margin-bottom:2px;">Execute</div>
+          <div style="font-size:11px;color:#52525b;margin-bottom:10px;">The system handles it</div>
+          <div style="font-size:12px;color:#71717a;line-height:1.5;">User-defined rules handle routine decisions. The daemon enforces policies across every agent. Humans only intervene on what's genuinely new.</div>
+        </div>
+      </div>
+
+      <!-- Wedge to platform -->
+      <div style="display:grid;grid-template-columns:auto 1fr auto 1fr auto;gap:0;align-items:center;">
+        <div style="text-align:center;padding:8px 16px;">
+          <div style="font-size:12px;font-weight:600;color:#71717a;">Wedge</div>
+          <div style="font-size:10px;color:#3f3f46;margin-top:2px;">Solo dev, 3 agents<br>Close your laptop safely</div>
+        </div>
+        <div style="text-align:center;color:#27272a;font-size:20px;">&rarr;</div>
+        <div style="text-align:center;padding:8px 16px;">
+          <div style="font-size:12px;font-weight:600;color:#d4a054;">v0</div>
+          <div style="font-size:10px;color:#52525b;margin-top:2px;">5-10 agents<br>Monitor + Control</div>
+        </div>
+        <div style="text-align:center;color:#27272a;font-size:20px;">&rarr;</div>
+        <div style="text-align:center;padding:8px 16px;">
+          <div style="font-size:12px;font-weight:600;color:#71717a;">Vision</div>
+          <div style="font-size:10px;color:#3f3f46;margin-top:2px;">Org, 50+ agents<br>Monitor + Control + Execute</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ROADMAP -->
+  <div class="vis-section" style="margin-bottom:40px;">
+    <div class="vis-label">Product Roadmap</div>
+    <div class="vis-title">How We Get There</div>
+    <div class="vis-sub" style="margin-bottom:40px;">Each phase solves a real problem at the current scale.</div>
+
+    <div class="rm-timeline">
+
+      <div class="rm-phase">
+        <div class="rm-marker"></div>
+        <div class="rm-version rm-version-active">v0</div>
+        <div class="rm-head"><div class="rm-name">Remote machine setup</div></div>
+        <div class="rm-desc">One command to set up a VPS for agents. Install deps, configure auth, deploy the daemon. Your agents get a dedicated home that's always on — your laptop is free.</div>
+        <div class="rm-features"><div class="rm-feat">one-command setup</div><div class="rm-feat">daemon install (systemd)</div><div class="rm-feat">Claude + GitHub auth</div><div class="rm-feat">binary distribution</div></div>
+      </div>
+
+      <div class="rm-phase">
+        <div class="rm-marker"></div>
+        <div class="rm-version rm-version-active">v0</div>
+        <div class="rm-head"><div class="rm-name">Launch agents + connect instantly</div></div>
+        <div class="rm-desc">Launch Claude on the remote machine. It runs in tmux — survives disconnects, laptop sleep, network changes. Reconnect in one keystroke from the picker.</div>
+        <div class="rm-features"><div class="rm-feat">launch into project</div><div class="rm-feat">persistent tmux sessions</div><div class="rm-feat">quick connect from picker</div><div class="rm-feat">clone repo as project seed</div></div>
+      </div>
+
+      <div class="rm-phase">
+        <div class="rm-marker"></div>
+        <div class="rm-version rm-version-active">v0</div>
+        <div class="rm-head"><div class="rm-name">Agent status detection</div><div class="rm-layer">monitor</div></div>
+        <div class="rm-desc">beefyd reads agent output via LLM. Detects working, waiting input, waiting permission, idle, stopped. Shows what the agent is asking — not just that it's blocked.</div>
+        <div class="rm-features"><div class="rm-feat">LLM-powered state detection</div><div class="rm-feat">pane preview</div><div class="rm-feat">attention-sorted picker</div><div class="rm-feat">agent summaries</div></div>
+      </div>
+
+      <div class="rm-phase">
+        <div class="rm-marker"></div>
+        <div class="rm-version rm-version-active">v0</div>
+        <div class="rm-head"><div class="rm-name">Reply without connecting</div><div class="rm-layer">control</div></div>
+        <div class="rm-desc">Answer questions and approve permissions from the picker. Agents get unblocked without you entering the session.</div>
+        <div class="rm-features"><div class="rm-feat">approve / deny permissions</div><div class="rm-feat">reply to input from picker</div></div>
+      </div>
+
+      <div class="rm-phase">
+        <div class="rm-marker"></div>
+        <div class="rm-version rm-version-active">v0</div>
+        <div class="rm-head"><div class="rm-name">Telegram notifications + reply</div><div class="rm-layer">control</div></div>
+        <div class="rm-desc">Agent stuck? Your phone buzzes. Reply from Telegram. The 2-hour wait becomes 2 minutes — even when your laptop is closed.</div>
+        <div class="rm-features"><div class="rm-feat">alerts on waiting / stuck</div><div class="rm-feat">reply from Telegram</div><div class="rm-feat">approve / deny from phone</div></div>
+      </div>
+
+      <div class="rm-phase">
+        <div class="rm-marker rm-marker-dim"></div>
+        <div class="rm-version">v1</div>
+        <div class="rm-head"><div class="rm-name">Local-to-remote sync</div></div>
+        <div class="rm-desc">Your local folder syncs to the remote machine. Edit in your IDE, agents work on the same files. Feels local, runs remote.</div>
+        <div class="rm-features"><div class="rm-feat">two-way file sync</div><div class="rm-feat">Mutagen-powered</div><div class="rm-feat">includes .git history</div></div>
+      </div>
+
+      <div class="rm-phase">
+        <div class="rm-marker rm-marker-dim"></div>
+        <div class="rm-version">v1</div>
+        <div class="rm-head"><div class="rm-name">Agent discovery</div><div class="rm-layer">monitor</div></div>
+        <div class="rm-desc">beefyd detects Claude sessions it didn't create. Install the daemon and immediately see every agent on the machine — not just ones launched through beefy.</div>
+        <div class="rm-features"><div class="rm-feat">discover existing sessions</div><div class="rm-feat">classify any Claude process</div></div>
+      </div>
+
+      <div class="rm-phase">
+        <div class="rm-marker rm-marker-dim"></div>
+        <div class="rm-version">v2</div>
+        <div class="rm-head"><div class="rm-name">Smart alerts</div><div class="rm-layer">monitor</div></div>
+        <div class="rm-desc">User-defined rules for when and how to get alerted. Stuck in a loop > 10 min? Alert. Idle > 1 hour? Alert. You teach the daemon what matters to you.</div>
+        <div class="rm-features"><div class="rm-feat">configurable alert rules</div><div class="rm-feat">loop / stuck detection</div><div class="rm-feat">multi-machine view</div></div>
+      </div>
+
+      <div class="rm-phase">
+        <div class="rm-marker rm-marker-dim"></div>
+        <div class="rm-version">v3</div>
+        <div class="rm-head"><div class="rm-name">Automated responses</div><div class="rm-layer">execute</div></div>
+        <div class="rm-desc">User-defined rules for actions. Auto-approve routine operations. Route specific decisions to specific people. The daemon handles what's predictable.</div>
+        <div class="rm-features"><div class="rm-feat">auto-approve rules</div><div class="rm-feat">decision routing</div><div class="rm-feat">action templates</div></div>
+      </div>
+
+      <div class="rm-phase rm-phase-future">
+        <div class="rm-marker rm-marker-empty"></div>
+        <div class="rm-version">vision</div>
+        <div class="rm-head"><div class="rm-name">No human in the loop</div><div class="rm-layer">execute</div></div>
+        <div class="rm-desc">The system runs without constant human attention. Org-wide visibility. Agents stay productive on their own. Shaped by everything learned before this point.</div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════ STRATEGY ════════════════ -->
+<div id="strategy" class="page">
+<div class="strategy">
+
+  <h1>Wedge → Platform</h1>
+
+  <p>People on Twitter are complaining about the same two things: <strong>"I can't close my laptop because my agent will die"</strong> and <strong>"my machine is melting from running 3 Claude sessions."</strong></p>
+
+  <p>That's the wedge. A visceral, immediate pain with a simple solution: <strong>put your agents on a remote machine.</strong> One command, always on, close your laptop whenever you want.</p>
+
+  <p>But the wedge is just the entry point. Here's what happens after:</p>
+
+  <div class="ladder">
+    <div class="ladder-step">
+      <div class="ls-label">Wedge</div>
+      <div class="ls-text"><strong>"Agents don't die when you close your laptop."</strong><br>Gets users onto remote machines with beefyd running. Solves the pain that's visible on Twitter today.</div>
+    </div>
+    <div class="ladder-step">
+      <div class="ls-label">Expand</div>
+      <div class="ls-text"><strong>"See all your agents without SSH-ing into each one."</strong><br>The picker + status detection. Users go from "I have remote agents" to "I can manage remote agents."</div>
+    </div>
+    <div class="ladder-step">
+      <div class="ls-label">Deepen</div>
+      <div class="ls-text"><strong>"Know WHY an agent is stuck, not just that it's stuck."</strong><br>LLM-powered semantic understanding. Pattern detection — loops, retries, wrong approaches. The daemon understands the work.</div>
+    </div>
+    <div class="ladder-step">
+      <div class="ls-label">Automate</div>
+      <div class="ls-text"><strong>"Define rules. Agents self-manage."</strong><br>Rules engine on top of detection. The human becomes optional for routine decisions. Alert rules first, then action rules.</div>
+    </div>
+    <div class="ladder-step">
+      <div class="ls-label">Scale</div>
+      <div class="ls-text"><strong>"Works for 10, 50, 100 agents."</strong><br>Multi-machine. Team features. Fleet management. Org-wide visibility. This is where it becomes infrastructure, not a tool.</div>
+    </div>
+  </div>
+
+  <h2>Why This Is One Product</h2>
+
+  <p>The daemon is the constant. <code>beefyd</code> runs on each machine at every stage. You never throw anything away. Each step adds capability to the same architecture.</p>
+
+  <p>The Twitter pain is distribution. The observability/control plane is the moat.</p>
+
+  <h2>The VC Story</h2>
+
+  <p>The need for this grows exponentially with agent count:</p>
+
+  <div class="ladder">
+    <div class="ladder-step">
+      <div class="ls-label">1-3 agents</div>
+      <div class="ls-text">Nice to have. Solves the "close my laptop" problem.</div>
+    </div>
+    <div class="ladder-step">
+      <div class="ls-label">5-10 agents</div>
+      <div class="ls-text">Essential. "You're the bottleneck" — can't manually check each one.</div>
+    </div>
+    <div class="ladder-step">
+      <div class="ls-label">10-50 agents</div>
+      <div class="ls-text">Infrastructure. Rules, automation, team features become mandatory.</div>
+    </div>
+    <div class="ladder-step">
+      <div class="ls-label">50+ agents</div>
+      <div class="ls-text">Enterprise. Selling to companies, not developers. Org-wide control plane.</div>
+    </div>
+  </div>
+
+  <div class="strategy-note">
+    <strong>Risk:</strong> Trying to sell the vision before shipping the wedge. The product needs to nail "close laptop, agents keep running, open TUI, instantly see who needs me" first. If that doesn't feel magical, the rest doesn't matter. Ship v0. Get users. The rest follows.
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════ TWO STORIES ════════════════ -->
+<div id="narrative" class="page">
+<div class="strategy">
+
+  <h1>Why the Vision Doesn't Mention "Laptop Melting"</h1>
+
+  <p>The "laptop melting / can't close the lid" pain is real. People are complaining about it on Twitter right now. But it's a <strong>symptom</strong>, not a problem worth building a company around.</p>
+
+  <h2>The laptop problem solves itself</h2>
+
+  <p>Anthropic, Cursor, and others will eventually offer cloud-hosted agent sessions natively. If our entire pitch is "run agents without your laptop on" — we're one vendor feature away from irrelevance. It's a commodity infrastructure play.</p>
+
+  <h2>The observability problem gets worse</h2>
+
+  <p>The more reliable and autonomous agents become, the more people will run, and the harder it gets to know which ones are actually producing value. That problem <strong>compounds</strong>. Nobody else is solving it.</p>
+
+  <h2>Two stories for two audiences</h2>
+
+  <div class="ladder">
+    <div class="ladder-step">
+      <div class="ls-label" style="color:#71717a;">Developer on Twitter</div>
+      <div class="ls-text"><strong>"Your laptop is melting and sessions die when you close the lid. Fix that in 5 minutes."</strong><br>Acquisition wedge — gets them to install beefy, gets beefyd on a machine.</div>
+    </div>
+    <div class="ladder-step">
+      <div class="ls-label">VC / Company buyer</div>
+      <div class="ls-text"><strong>"You don't know when your agents break. We're the control plane."</strong><br>The business — what we're actually building and what scales.</div>
+    </div>
+  </div>
+
+  <h2>The narrative structure</h2>
+
+  <p><strong>"Remote machines"</strong> is HOW you get deployed.<br>
+  <strong>"Agent observability"</strong> is WHY you exist.</p>
+
+  <p>The vision text nails the "why." Don't dilute it with the "how."</p>
+
+  <p>The laptop/melting story is a blog post, a tweet, a first-line hook on the landing page. It's <strong>marketing for the wedge</strong>. It's not the company story.</p>
+
+  <div class="strategy-note">
+    <strong>This separation is a strength.</strong> Your acquisition motion (simple, visceral, immediate) is different from your retention/expansion motion (deep, compounding, necessary). That's what good products look like.
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════ K8S ANALOGY ════════════════ -->
+<div id="k8s" class="page">
+<div class="strategy">
+
+  <h1>The Kubernetes Analogy</h1>
+
+  <p>The closest mental model for beefy is Kubernetes — but for a fundamentally different kind of workload.</p>
+
+  <h2>What's the same</h2>
+
+  <p>Kubernetes manages workloads on remote machines. So does beefy. Both handle lifecycle (start, stop, health checks), both provide visibility into what's running, and both scale across multiple machines. The daemon-per-node architecture is the same: kubelet on each machine, beefyd on each machine.</p>
+
+  <h2>What's different</h2>
+
+  <p>Kubernetes manages <strong>dumb compute</strong>. Containers don't ask questions. They don't need permission. They don't get confused about what approach to take. They either run or they don't. Health checks are pings — is the process alive? Is it responding on port 8080?</p>
+
+  <p>Beefy manages <strong>smart compute that sometimes needs a human</strong>. Agents ask questions, need permissions, get stuck on the wrong approach, loop on errors. They're autonomous workers that hit decision points only a human can resolve. Process-level health checks are useless — an agent burning CPU at 100% could be doing great work or stuck in an infinite loop.</p>
+
+  <div style="overflow-x:auto;margin:28px 0;">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead>
+        <tr>
+          <th style="text-align:left;padding:10px 16px;border-bottom:1px solid #1c1c22;color:#52525b;font-weight:600;"></th>
+          <th style="text-align:left;padding:10px 16px;border-bottom:1px solid #1c1c22;color:#52525b;font-weight:600;">Kubernetes</th>
+          <th style="text-align:left;padding:10px 16px;border-bottom:1px solid #1c1c22;color:#d4a054;font-weight:600;">Beefy</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#71717a;font-weight:500;">Manages</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">Containers (dumb compute)</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">AI agents (smart compute)</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#71717a;font-weight:500;">Workloads need</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">Infrastructure decisions — where to run, how many, what resources</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">Human decisions — should I update the tests? can I read this file?</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#71717a;font-weight:500;">Health check</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">Is the process alive? Is it responding to pings?</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">What is the agent doing? Is it stuck? What is it asking?</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#71717a;font-weight:500;">Failure mode</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">Structural — OOM, crash, timeout</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">Semantic — looping, wrong approach, waiting for input</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#71717a;font-weight:500;">Sees inside workloads</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">No — CPU, memory, process status only</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">Yes — reads and understands agent output via LLM</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#71717a;font-weight:500;">Intelligence</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">In the system — K8s decides where, when, and how</td>
+          <td style="padding:10px 16px;border-bottom:1px solid #111114;color:#a1a1aa;">In the workload — agents are smart, beefy connects them to humans</td>
+        </tr>
+        <tr>
+          <td style="padding:10px 16px;color:#71717a;font-weight:500;">Core job</td>
+          <td style="padding:10px 16px;color:#a1a1aa;">Keep containers running in desired state</td>
+          <td style="padding:10px 16px;color:#a1a1aa;">Keep agents making progress by routing them to humans</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Why this matters</h2>
+
+  <p>Kubernetes was necessary because containers are dumb — <em>someone</em> had to decide where to run them, when to restart them, how to scale. The container can't make those decisions for itself.</p>
+
+  <p>Beefy is necessary because agents are smart but imperfect — they do amazing work but hit decision points where they need a human. The agent doesn't need beefy to think for it. It needs beefy to <strong>find it a human, fast.</strong></p>
+
+  <h2>The capability K8s never needed</h2>
+
+  <p>Kubernetes doesn't understand what your containers are <em>doing</em>. It knows CPU, memory, and health checks. That's enough because containers are deterministic — same input, same output.</p>
+
+  <p>Agents are not deterministic. The same prompt can lead to different reasoning paths, different mistakes, different places where they get stuck. The only way to know what an agent is doing is to <strong>read what it's saying</strong>. That's why beefyd uses an LLM — it's the first infrastructure that understands the content of the workloads it manages.</p>
+
+  <div class="strategy-note">
+    <strong>One-line version:</strong> Kubernetes is infrastructure for dumb compute. Beefy is infrastructure for smart compute that sometimes needs a human.
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════ STORY ════════════════ -->
+<div id="story" class="page">
+<div class="story-wrap">
+
+  <!-- PROBLEM -->
+  <div class="story-section">
+    <div class="story-section-label">The Problem</div>
+    <h1>You Don't Know When Your Agents Break</h1>
+
+    <p>Agents don't fail like servers — they fail silently.</p>
+
+    <p>When a server breaks, you know immediately — CPU spikes, memory blows up, alerts fire.</p>
+
+    <p><strong>When an agent breaks, nothing happens — it just stops producing value.</strong></p>
+
+    <p>The process still runs. The logs still flow. But inside, one agent is hitting the same permissions error for two hours. Another is waiting for input no one knows it needs. A third is stuck in a loop, calling the same tool over and over.</p>
+
+    <p>There's no obvious sign when an agent is broken. You won't get an alert — it's just wasted time and compute.</p>
+
+    <p><strong>You don't know there's a problem until you go looking for it.</strong></p>
+
+    <p>So to know the state of your agents, you check manually. SSH into the machine, reopen the session, read through its reasoning, outputs, and tool calls to figure out what it was trying to do, where it got stuck, and what it needs. Fix it. Move to the next.</p>
+
+    <p><strong>Checking the agents' state manually works when you have 3 agents. It breaks when you have 10. And developers are going from 3 to 10 to 50.</strong></p>
+
+    <p>Now you're the bottleneck. Parallelism disappears. And your "autonomous" system only runs if someone is watching it.</p>
+
+    <p>Keeping agents productive isn't a monitoring problem. You don't need to know if an agent is <em>running</em>.</p>
+
+    <p>Agents fail in their reasoning — you need to know if they're actually making progress.</p>
+  </div>
+
+  <!-- SOLUTION -->
+  <div class="story-section">
+    <div class="story-section-label">The Solution</div>
+    <h1>Keep Every Agent Productive</h1>
+
+    <p><code>beefyd</code> runs next to your agents and watches what they're doing in real time.</p>
+
+    <p>It reads their outputs, understands their state, and tells you what's actually happening:</p>
+
+    <ul>
+      <li>Working</li>
+      <li>Stuck (and why)</li>
+      <li>Waiting (and on what)</li>
+    </ul>
+
+    <p>All your agents show up in one place, prioritized by what needs attention.</p>
+
+    <p>No SSH. No digging. No guessing.</p>
+
+    <p>And once you can see what's going on, you can act on it automatically. Agent waiting for input longer than 10 minutes? Send an alert. Stuck in a loop? Flag it. Needs a decision? Route it to the right person.</p>
+
+    <p>You define the rules once. They run across every agent, all the time.</p>
+
+    <p>Agents don't sit idle. Compute doesn't get wasted. Nothing depends on someone remembering to check.</p>
+
+    <p style="color:#d4a054;font-weight:600;">With beefy, you stop babysitting agents.<br>Every agent is either making progress — or you know exactly why it stopped.</p>
+  </div>
+
+</div>
+</div>
+
+<script>
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelector(`[onclick="showPage('${id}')"]`).classList.add('active');
+  window.scrollTo(0, 0);
+}
+</script>
+
+</body>
+</html>
