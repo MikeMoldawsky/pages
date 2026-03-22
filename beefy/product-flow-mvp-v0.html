@@ -1,0 +1,1730 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Beefy UX Flows v11 — Final</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: #1d1d1f; color: #f5f5f7; line-height: 1.5; }
+    .tabs { display: flex; background: #2d2d2f; border-bottom: 1px solid #424245; padding: 0 16px; position: sticky; top: 0; z-index: 10; flex-wrap: wrap; }
+    .tab { padding: 12px 12px; font-size: 12px; color: #86868b; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; white-space: nowrap; }
+    .tab:hover { color: #f5f5f7; }
+    .tab.active { color: #f5f5f7; border-bottom-color: #0a84ff; }
+    .tab-content { display: none; padding: 32px 24px; max-width: 920px; }
+    .tab-content.active { display: block; }
+    h2 { font-size: 1.3rem; margin-bottom: 6px; }
+    h3 { font-size: 1rem; margin-top: 28px; margin-bottom: 4px; }
+    .sub { color: #86868b; margin-bottom: 24px; font-size: 14px; }
+    .note { color: #86868b; font-size: 12px; margin-top: 6px; margin-bottom: 20px; font-style: italic; }
+    .mt { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 3px; margin-left: 6px; font-family: system-ui; letter-spacing: 0.3px; vertical-align: middle; }
+    .mt-t { background: #1a3a2a; color: #3fb950; border: 1px solid #2d5a3d; }
+    .mt-c { background: #3a2a1a; color: #d29922; border: 1px solid #5a4a2d; }
+    .mt-s { background: #1a2a3a; color: #58a6ff; border: 1px solid #2d3a5a; }
+    .t { font-family: 'SF Mono', Monaco, Consolas, monospace; font-size: 12px; line-height: 1.7; background: #0d1117; color: #8b949e; padding: 14px 16px; border-radius: 8px; margin: 12px 0 8px 0; overflow-x: auto; }
+    .tl { font-size: 11px; color: #636366; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 24px; margin-bottom: 4px; }
+    .ts { display: flex; gap: 0; }
+    .tl-l { flex: 1; min-width: 0; }
+    .tl-r { width: 210px; border-left: 1px solid #21262d; padding-left: 14px; margin-left: 12px; font-size: 11.5px; }
+    .rs { background: #161b22; padding: 1px 0; color: #c9d1d9; }
+    .w { color: #c9d1d9; } .b { color: #e6edf3; } .a { color: #d29922; }
+    .g { color: #3fb950; } .r { color: #f85149; } .bl { color: #58a6ff; }
+    .d { color: #484f58; } .gr { color: #8b949e; } .sp { color: #21262d; }
+    .pt { color: #c9d1d9; font-size: 13px; margin-bottom: 14px; }
+    .pq { color: #e6edf3; line-height: 1.55; margin-bottom: 16px; font-size: 12.5px; }
+    .pm { line-height: 2; font-size: 11px; }
+    .pm span { color: #484f58; }
+    .pa { border-top: 1px solid #21262d; margin-top: 12px; padding-top: 10px; font-size: 11px; line-height: 2.2; color: #484f58; }
+    .fb { background: #2d2d2f; border: 1px solid #424245; border-radius: 8px; padding: 16px; margin: 12px 0 20px 0; font-size: 13px; line-height: 1.8; }
+    .fb .s { color: #86868b; } .fb .s b { color: #f5f5f7; font-weight: 500; }
+    .fb .ar { color: #636366; margin: 4px 0; }
+    .fb .br { color: #0a84ff; font-size: 12px; margin-left: 16px; }
+    .ii { background: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 4px 8px; color: #c9d1d9; font-family: inherit; font-size: 11.5px; width: 100%; margin: 4px 0; }
+    .dv { border-top: 1px solid #424245; margin: 36px 0 28px 0; }
+    .sa { text-align: center; color: #636366; font-size: 20px; margin: 8px 0; }
+    pre.c { margin: 0; white-space: pre; font-size: 12px; line-height: 1.7; }
+    table.cmd { width: 100%; border-collapse: collapse; font-size: 13px; margin: 12px 0 20px 0; }
+    table.cmd th { text-align: left; color: #86868b; font-weight: 500; padding: 8px 10px; border-bottom: 1px solid #424245; font-size: 11px; text-transform: uppercase; letter-spacing: 0.3px; }
+    table.cmd td { padding: 6px 10px; border-bottom: 1px solid #2d2d2f; vertical-align: top; }
+    table.cmd td:first-child { font-family: 'SF Mono', Monaco, monospace; font-size: 11.5px; color: #c9d1d9; white-space: nowrap; }
+    table.cmd td:nth-child(2) { color: #86868b; }
+    .warn { background: #2d2518; border: 1px solid #5a4a2d; border-radius: 6px; padding: 10px 14px; margin: 8px 0; font-size: 12px; color: #d29922; }
+    .err { background: #2d1818; border: 1px solid #5a2d2d; border-radius: 6px; padding: 10px 14px; margin: 8px 0; font-size: 12px; color: #f85149; }
+  </style>
+</head>
+<body>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('picker')">Agent Picker</div>
+  <div class="tab" onclick="showTab('actions')">Agent Actions</div>
+  <div class="tab" onclick="showTab('launch')">Launch & Clone</div>
+  <div class="tab" onclick="showTab('reply')">Reply Inline</div>
+  <div class="tab" onclick="showTab('onboarding')">Onboarding</div>
+  <div class="tab" onclick="showTab('machine')">Machine Health</div>
+  <div class="tab" onclick="showTab('projects')">Projects</div>
+  <div class="tab" onclick="showTab('cli')">CLI Commands</div>
+  <div class="tab" onclick="showTab('telegram')">Telegram</div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 1: AGENT PICKER                                          -->
+<!-- ============================================================ -->
+<div id="tab-picker" class="tab-content active">
+  <h2>Agent Picker <span class="mt mt-t">TUI</span></h2>
+  <p class="sub">The main screen. Full terminal takeover. All agent states shown.</p>
+
+  <div class="tl">Empty state</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  0 Agents
+
+    No agents yet.
+
+    Press <span class="w">s</span> for a quick session,
+    or <span class="w">n</span> to launch an agent on a project.
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">n</span> New agent  <span class="w">s</span> Quick session</pre>
+    </div>
+    <div class="tl-r" style="color:#484f58;display:flex;align-items:center;justify-content:center;font-size:12px;text-align:center;line-height:1.6">Select an agent<br>to see details</div>
+  </div></div>
+
+  <div class="tl">Waiting for input</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  5 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span></span>
+   <span class="a">●</span> deployer      api-service    <span class="a">needs perm</span>          <span class="d">5m</span>
+<span class="d">  ─────────────────────────────────────────────────────</span>
+   <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span>
+   <span class="g">●</span> worker        myproject      <span class="gr">idle</span>                <span class="d">20m</span>
+   <span class="d">○ research      —              stopped             2d</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session  <span class="w">/</span> Search</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">test-fixer</div>
+      <div class="pq">"Should I refactor the auth module or just fix the failing test?"</div>
+      <div class="pm"><div><span>Project</span>  myproject</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">t</span> Reply<br><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop<br><span class="w">r</span> Rename</div>
+    </div>
+  </div></div>
+
+  <div class="tl">Waiting for permission</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  5 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+   <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span>
+<span class="rs"><span class="w"> →</span> <span class="a">●</span> deployer      api-service    <span class="a">needs perm</span>          <span class="d">5m</span></span>
+<span class="d">  ─────────────────────────────────────────────────────</span>
+   <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span>
+   <span class="g">●</span> worker        myproject      <span class="gr">idle</span>                <span class="d">20m</span>
+   <span class="d">○ research      —              stopped             2d</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session  <span class="w">/</span> Search</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">deployer</div>
+      <div class="pq">"Run database migration on production?"</div>
+      <div class="pm"><div><span>Project</span>  api-service</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">y</span> Approve  <span class="w">d</span> Deny<br><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop</div>
+      <div style="margin-top:6px;font-size:10px;color:#484f58">Delete hidden while permission active</div>
+    </div>
+  </div></div>
+
+  <div class="tl">Running</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  5 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+   <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span>
+   <span class="a">●</span> deployer      api-service    <span class="a">needs perm</span>          <span class="d">5m</span>
+<span class="d">  ─────────────────────────────────────────────────────</span>
+<span class="rs"><span class="w"> →</span> <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span></span>
+   <span class="g">●</span> worker        myproject      <span class="gr">idle</span>                <span class="d">20m</span>
+   <span class="d">○ research      —              stopped             2d</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session  <span class="w">/</span> Search</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">backend</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Running for 12 minutes</div>
+      <div class="pm"><div><span>Project</span>  myproject</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop<br><span class="w">r</span> Rename</div>
+    </div>
+  </div></div>
+
+  <div class="tl">Idle</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  5 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+   <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span>
+   <span class="a">●</span> deployer      api-service    <span class="a">needs perm</span>          <span class="d">5m</span>
+<span class="d">  ─────────────────────────────────────────────────────</span>
+   <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span>
+<span class="rs"><span class="w"> →</span> <span class="g">●</span> worker        myproject      <span class="gr">idle</span>                <span class="d">20m</span></span>
+   <span class="d">○ research      —              stopped             2d</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session  <span class="w">/</span> Search</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">worker</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Idle for 20 minutes</div>
+      <div class="pm"><div><span>Project</span>  myproject</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop<br><span class="w">r</span> Rename</div>
+    </div>
+  </div></div>
+
+  <div class="tl">Stopped — standalone session with files</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  5 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+   <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span>
+   <span class="a">●</span> deployer      api-service    <span class="a">needs perm</span>          <span class="d">5m</span>
+<span class="d">  ─────────────────────────────────────────────────────</span>
+   <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span>
+   <span class="g">●</span> worker        myproject      <span class="gr">idle</span>                <span class="d">20m</span>
+<span class="rs"><span class="w"> →</span> <span class="d">○ research      —              stopped             2d</span></span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session  <span class="w">/</span> Search</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">research</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Stopped 2 days ago<br>14 files in folder</div>
+      <div class="pm"><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">⏎</span> Reconnect<br><span class="w">p</span> Save as project<br><span class="w">r</span> Rename<br><span class="w">d</span> Delete <span class="d">(removes files)</span></div>
+    </div>
+  </div></div>
+
+  <div class="tl">Stopped — project agent (no file warning)</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  5 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+   <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span>
+   <span class="a">●</span> deployer      api-service    <span class="a">needs perm</span>          <span class="d">5m</span>
+<span class="d">  ─────────────────────────────────────────────────────</span>
+   <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span>
+<span class="rs"><span class="w"> →</span> <span class="d">○ worker        myproject      stopped             1d</span></span>
+   <span class="d">○ research      —              stopped             2d</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session  <span class="w">/</span> Search</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">worker</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Stopped 1 day ago</div>
+      <div class="pm"><div><span>Project</span>  myproject</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">⏎</span> Reconnect<br><span class="w">r</span> Rename<br><span class="w">d</span> Delete</div>
+    </div>
+  </div></div>
+  <p class="note">Project agent: no "Save as project" (already in one). No file warning on delete (files belong to project, not agent).</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 2: AGENT ACTIONS                                         -->
+<!-- ============================================================ -->
+<div id="tab-actions" class="tab-content">
+  <h2>Agent Actions <span class="mt mt-t">TUI</span></h2>
+  <p class="sub">All inline actions that happen in the panel. No screen changes — panel content swaps.</p>
+
+  <h3>Delete — stopped agent with project</h3>
+  <div class="tl">Press d → confirmation in panel</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="d">○ worker        myproject      stopped             1d</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">Delete agent</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Remove worker?</div>
+      <div class="pa"><span class="w">y</span> Delete<br><span class="w">esc</span> Cancel</div>
+    </div>
+  </div></div>
+  <p class="note">Simple confirm. No file warning (files belong to project).</p>
+
+  <div class="dv"></div>
+  <h3>Delete — running/idle agent (process alive)</h3>
+  <div class="tl">Press d → warns about stopping</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="g">●</span> worker        myproject      <span class="gr">idle</span>                <span class="d">20m</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">Delete agent</div>
+      <div class="a" style="margin-bottom:12px;font-size:12px">Stop and remove worker?</div>
+      <div class="pa"><span class="w">y</span> Delete<br><span class="w">esc</span> Cancel</div>
+    </div>
+  </div></div>
+  <p class="note">Amber warning: "Stop and remove" because the process is still alive.</p>
+
+  <div class="sa">↓ press y</div>
+
+  <div class="tl">Agent removed from list</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  4 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+   <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span>
+   <span class="a">●</span> deployer      api-service    <span class="a">needs perm</span>          <span class="d">5m</span>
+<span class="d">  ─────────────────────────────────────────────────────</span>
+<span class="rs"><span class="w"> →</span> <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span></span>
+   <span class="d">○ research      —              stopped             2d</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session  <span class="w">/</span> Search</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">backend</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Running for 12 minutes</div>
+      <div class="pm"><div><span>Project</span>  myproject</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop<br><span class="w">r</span> Rename</div>
+    </div>
+  </div></div>
+  <p class="note">Worker gone. Cursor moves to next agent. Count updates to 4.</p>
+
+  <div class="dv"></div>
+  <h3>Delete — standalone session with files (warns)</h3>
+  <div class="tl">Press d → warning in panel</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="d">○ research      —              stopped             2d</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">Delete agent</div>
+      <div class="a" style="margin-bottom:12px;font-size:12px">Remove research?<br>14 files will be deleted.</div>
+      <div class="pa"><span class="w">y</span> Delete<br><span class="w">p</span> Save as project first<br><span class="w">esc</span> Cancel</div>
+    </div>
+  </div></div>
+  <p class="note">Amber warning: file count. Extra option: <code>p</code> to save as project before deleting. Esc cancels.</p>
+
+  <div class="dv"></div>
+  <h3>Rename</h3>
+  <div class="tl">Press r → input in panel</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">Rename agent</div>
+      <div class="ii" style="max-width:170px">backend█</div>
+      <div style="margin-top:8px;font-size:11px;color:#484f58"><span class="w">⏎</span> Save<br><span class="w">esc</span> Cancel</div>
+    </div>
+  </div></div>
+
+  <div class="sa">↓ type new name, press ⏎</div>
+
+  <div class="tl">Name updated in list</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="g">●</span> api-worker    myproject      <span class="gr">running</span>             <span class="d">now</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">api-worker</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Running for 12 minutes</div>
+      <div class="pm"><div><span>Project</span>  myproject</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop<br><span class="w">r</span> Rename</div>
+    </div>
+  </div></div>
+
+  <div class="tl">Rename collision — name already taken</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">Rename agent</div>
+      <div class="ii" style="max-width:170px;border-color:#f85149">worker█</div>
+      <div class="r" style="margin-top:4px;font-size:11px">Name already in use</div>
+      <div style="margin-top:8px;font-size:11px;color:#484f58"><span class="w">⏎</span> Save<br><span class="w">esc</span> Cancel</div>
+    </div>
+  </div></div>
+  <p class="note">Red border on input + error text. User must pick a unique name.</p>
+
+  <div class="dv"></div>
+  <h3>Stop</h3>
+  <div class="tl">Press x → agent stops immediately</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="d">○ backend       myproject      stopped             now</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">backend</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Stopped just now</div>
+      <div class="pm"><div><span>Project</span>  myproject</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">⏎</span> Reconnect<br><span class="w">r</span> Rename<br><span class="w">d</span> Delete</div>
+    </div>
+  </div></div>
+  <p class="note">No confirmation for stop — it's a safe operation (agent can be restarted). Dot → gray, status → stopped. Drops below separator on next refresh.</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 3: LAUNCH & CLONE                                        -->
+<!-- ============================================================ -->
+<div id="tab-launch" class="tab-content">
+  <h2>Launch & Clone <span class="mt mt-t">TUI</span></h2>
+  <p class="sub">Quick session, launch list, and clone with GitHub setup.</p>
+
+  <div class="tl">Press 's' — quick session</div>
+  <div class="t">
+<pre class="c">  <span class="a">●</span> Launching session-3 on beast...</pre>
+  </div>
+  <div class="sa">↓ exits TUI</div>
+  <div class="tl"><span class="mt mt-s">SSH</span></div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c">  <span class="d">Connected to session-3 on beast</span>
+  <span class="d">Ctrl+B D to detach · run beefy to manage agents</span>
+
+  ╭──────────────────────────────────╮
+  │ Claude Code                      │
+  │ What would you like to work on?  │
+  ╰──────────────────────────────────╯</pre>
+  </div>
+
+  <div class="dv"></div>
+  <div class="tl">Press 'n' — launch list</div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Launch agent</span>
+<span class="gr">  What do you want to work on?</span>
+
+<span class="a">  → myproject</span>
+<span class="w">    api-service</span>
+<span class="d">  ─────────────────────────────────────────────────</span>
+<span class="w">    Quick session</span> <span class="d">— start fresh, keep files if useful</span>
+<span class="w">    Clone a GitHub repo</span> <span class="d">— pull a repo to the machine</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  ↑↓ select   ⏎ confirm   esc back   q quit</pre>
+  </div>
+
+  <div class="dv"></div>
+  <h3>Clone a GitHub repo — full flow</h3>
+  <p class="sub">GitHub access checked first. Setup runs before repo URL.</p>
+
+  <div class="tl">Step 1 — Checking GitHub</div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Clone a GitHub repo</span>
+
+    <span class="a">●</span> Checking GitHub access on beast...</pre>
+  </div>
+  <div class="sa">↓</div>
+  <div class="tl">Step 2a — configured → repo URL</div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Clone a GitHub repo</span>
+
+    <span class="g">✓</span> GitHub access configured
+
+<span class="gr">  Repo URL</span>
+  <span class="a">▸</span> <span class="d">e.g. github.com/org/repo</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  ⏎ clone   esc back</pre>
+  </div>
+  <div class="tl">Step 2b — NOT configured → setup</div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Clone a GitHub repo</span>
+
+    <span class="a">●</span> GitHub access not configured
+
+<span class="gr">  Set up GitHub access?</span>
+<span class="a">  → Yes</span> <span class="d">— lets agents clone and push to private repos</span>
+<span class="w">    Skip</span> <span class="d">— you can set this up later</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  ↑↓ select   ⏎ confirm</pre>
+  </div>
+  <div class="sa">↓ Yes</div>
+  <div class="tl">Step 3 — Show SSH key</div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Clone a GitHub repo › GitHub setup</span>
+
+    <span class="g">✓</span> SSH key found on beast
+
+  <span class="gr">1. Copy this key:</span>
+  <span class="w">ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG...kP9 root@beast</span>
+
+  <span class="gr">2. Add it at</span> <span class="bl">https://github.com/settings/ssh/new</span>
+
+<span class="gr">  Ready?</span>
+<span class="a">  → Verify access</span>
+<span class="w">    Skip</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  ↑↓ select   ⏎ confirm</pre>
+  </div>
+  <div class="sa">↓ Verify</div>
+  <div class="tl">Step 4a — verified → repo URL</div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Clone a GitHub repo</span>
+
+    <span class="g">✓</span> GitHub access configured
+
+<span class="gr">  Repo URL</span>
+  <span class="a">▸</span> <span class="d">e.g. github.com/org/repo</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  ⏎ clone   esc back</pre>
+  </div>
+  <div class="tl">Step 4b — verification failed</div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Clone a GitHub repo › GitHub setup</span>
+
+    <span class="r">✗</span> <span class="r">Could not verify access. Make sure the key was added.</span>
+
+<span class="a">  → Try again</span>
+<span class="w">    Skip</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  ↑↓ select   ⏎ confirm</pre>
+  </div>
+  <div class="sa">↓ repo URL entered</div>
+  <div class="tl">Step 5 — cloning + launching</div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Clone a GitHub repo</span>
+
+    <span class="g">✓</span> GitHub access configured
+    <span class="g">✓</span> Cloned github.com/acme/payments
+    <span class="a">●</span> Launching payments-1 on beast...</pre>
+  </div>
+  <p class="note">Project name = repo name (payments). Agent name = payments-1 (daemon auto-generates). TUI exits → SSH.</p>
+
+  <div class="tl">Clone error — repo not found or access denied</div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Clone a GitHub repo</span>
+
+    <span class="g">✓</span> GitHub access configured
+    <span class="r">✗</span> <span class="r">Could not clone github.com/acme/private-repo</span>
+      <span class="gr">Repository not found or access denied.</span>
+
+    <span class="w">e</span> <span class="d">Edit URL</span>   <span class="w">esc</span> <span class="d">back</span></pre>
+  </div>
+  <p class="note">User can fix the URL or go back to the launch list.</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 4: REPLY INLINE                                          -->
+<!-- ============================================================ -->
+<div id="tab-reply" class="tab-content">
+  <h2>Reply Without Connecting <span class="mt mt-t">TUI</span></h2>
+  <p class="sub"><code>t</code> for text reply, <code>y/n</code> for permissions. <code>⏎</code> always means connect.</p>
+
+  <h3>Free-text reply</h3>
+  <div class="tl">Before — panel shows all actions</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  5 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span></span>
+   <span class="a">●</span> deployer      api-service    <span class="a">needs perm</span>          <span class="d">5m</span>
+<span class="d">  ─────────────────────────────────────────────────────</span>
+   <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span>
+   <span class="g">●</span> worker        myproject      <span class="gr">idle</span>                <span class="d">20m</span>
+   <span class="d">○ research      —              stopped             2d</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session  <span class="w">/</span> Search</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">test-fixer</div>
+      <div class="pq">"Should I refactor the auth module or just fix the failing test?"</div>
+      <div class="pm"><div><span>Project</span>  myproject</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">t</span> Reply<br><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop<br><span class="w">r</span> Rename</div>
+    </div>
+  </div></div>
+  <div class="sa">↓ press t</div>
+  <div class="tl">Reply field opens</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  5 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span></span>
+   <span class="a">●</span> deployer      api-service    <span class="a">needs perm</span>          <span class="d">5m</span>
+<span class="d">  ─────────────────────────────────────────────────────</span>
+   <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span>
+   <span class="g">●</span> worker        myproject      <span class="gr">idle</span>                <span class="d">20m</span>
+   <span class="d">○ research      —              stopped             2d</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session  <span class="w">/</span> Search</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">test-fixer</div>
+      <div class="pq">"Should I refactor the auth module or just fix the failing test?"</div>
+      <div style="margin:10px 0 6px 0;font-size:11px;color:#484f58">Reply:</div>
+      <div class="ii">Just fix the test█</div>
+      <div style="margin-top:8px;font-size:11px;color:#484f58"><span class="w">⏎</span> Send<br><span class="w">esc</span> Cancel<br><span class="d">────────────────</span><br><span class="w">c</span> Connect instead</div>
+    </div>
+  </div></div>
+  <div class="sa">↓ press ⏎</div>
+  <div class="tl">Sent — agent resumes</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  5 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="g">●</span> test-fixer    myproject      <span class="gr">running</span>             <span class="d">now</span></span>
+   <span class="a">●</span> deployer      api-service    <span class="a">needs perm</span>          <span class="d">5m</span>
+<span class="d">  ─────────────────────────────────────────────────────</span>
+   <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span>
+   <span class="g">●</span> worker        myproject      <span class="gr">idle</span>                <span class="d">20m</span>
+   <span class="d">○ research      —              stopped             2d</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session  <span class="w">/</span> Search</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">test-fixer</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Running for 1 minute</div>
+      <div class="pm"><div><span>Project</span>  myproject</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop<br><span class="w">r</span> Rename</div>
+    </div>
+  </div></div>
+
+  <div class="dv"></div>
+  <h3>Permission: Allow (y)</h3>
+  <div class="tl">Before</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+   <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span>
+<span class="rs"><span class="w"> →</span> <span class="a">●</span> deployer      api-service    <span class="a">needs perm</span>          <span class="d">5m</span></span>
+<span class="d">  ─────────────────────────────────────────────────────</span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">deployer</div>
+      <div class="pq">"Run database migration on production?"</div>
+      <div class="pa"><span class="w">y</span> Approve  <span class="w">d</span> Deny<br><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop</div>
+    </div>
+  </div></div>
+  <div class="sa">↓ press y</div>
+  <div class="tl">After — approved, drops below separator</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+   <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span>
+<span class="d">  ─────────────────────────────────────────────────────</span>
+<span class="rs"><span class="w"> →</span> <span class="g">●</span> deployer      api-service    <span class="gr">running</span>             <span class="d">now</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">deployer</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Running for 1 minute</div>
+      <div class="pa"><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop<br><span class="w">r</span> Rename</div>
+    </div>
+  </div></div>
+
+  <div class="dv"></div>
+  <h3>Permission: Deny (d)</h3>
+  <div class="sa">↓ press d</div>
+  <div class="tl">After denial, Claude may ask follow-up</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+   <span class="a">●</span> test-fixer    myproject      <span class="a">waiting input</span>       <span class="d">2m</span>
+<span class="rs"><span class="w"> →</span> <span class="a">●</span> deployer      api-service    <span class="a">waiting input</span>       <span class="d">now</span></span>
+<span class="d">  ─────────────────────────────────────────────────────</span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">deployer</div>
+      <div class="pq">"Got it. Should I create a migration plan instead?"</div>
+      <div class="pa"><span class="w">t</span> Reply<br><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop<br><span class="w">r</span> Rename</div>
+    </div>
+  </div></div>
+  <p class="note">Status: "needs perm" → "waiting input." Panel switches from <code>y</code>/<code>d</code> approve/deny to <code>t</code> Reply + <code>d</code> Delete. CLI equivalent: <code>beefy deny &lt;name&gt;</code>.</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 5: ONBOARDING                                            -->
+<!-- ============================================================ -->
+<div id="tab-onboarding" class="tab-content">
+  <h2>Onboarding — First Run</h2>
+  <p class="sub">Console setup → SSH session with onboarding agent → TUI.</p>
+
+  <div class="tl">Screen 1 — SSH host <span class="mt mt-c">Console</span></div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Welcome to beefy</span>
+
+<span class="gr">  Enter the SSH host for your remote machine</span>
+  <span class="a">▸</span> <span class="w">root@167.71.23.45█</span>
+    <span class="d">e.g. user@host or an SSH config alias</span></pre>
+  </div>
+  <div class="sa">↓</div>
+  <div class="tl">Screen 2a — SSH success → setup starts <span class="mt mt-c">Console</span></div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Setting up your machine</span>
+
+    <span class="g">✓</span> Connected to 167.71.23.45
+    <span class="g">✓</span> Dependencies installed
+    <span class="a">●</span> Installing Claude Code...
+    <span class="d">○ Authenticating Claude</span></pre>
+  </div>
+  <p class="note">No machine name step. Auto-derived from hostname. No GitHub — deferred.</p>
+  <div class="tl">Screen 2b — SSH auth failed <span class="mt mt-c">Console</span></div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Welcome to beefy</span>
+
+    <span class="r">✗</span> <span class="r">SSH authentication failed for 167.71.23.45</span>
+
+<span class="gr">  Found SSH keys on your system:</span>
+<span class="a">  → ~/.ssh/id_ed25519</span>
+<span class="w">    ~/.ssh/id_rsa</span>
+<span class="w">    ~/.ssh/work_key</span>
+<span class="d">  ─────────────────────────────────────────────────</span>
+<span class="w">    Enter a key path manually</span></pre>
+  </div>
+  <div class="tl">Screen 2c — All keys failed <span class="mt mt-c">Console</span></div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Welcome to beefy</span>
+
+    <span class="r">✗</span> <span class="r">Could not connect to 167.71.23.45</span>
+
+    <span class="gr">Check that:</span>
+    <span class="gr">• The host is reachable</span>
+    <span class="gr">• SSH is enabled on the server</span>
+    <span class="gr">• Your SSH key is authorized</span>
+
+    <span class="w">r</span> <span class="d">Try again</span>   <span class="w">e</span> <span class="d">Edit host</span>   <span class="d">q quit</span></pre>
+  </div>
+  <div class="sa">↓</div>
+  <div class="tl">Screen 3 — Claude auth <span class="mt mt-c">Console</span></div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Setting up your machine</span>
+
+    <span class="g">✓</span> Connected
+    <span class="g">✓</span> Dependencies installed
+    <span class="g">✓</span> Claude Code installed
+    <span class="a">●</span> Authenticating Claude
+
+<span class="gr">  Copy Claude credentials to the remote machine?</span>
+<span class="a">  → Yes, copy my setup</span> <span class="d">(may require system password)</span>
+<span class="w">    No, I'll log in manually later</span></pre>
+  </div>
+  <div class="sa">↓</div>
+  <div class="tl">Screen 4 — Permission toggle <span class="mt mt-c">Console</span></div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Setting up your machine</span>
+
+    <span class="g">✓</span> Connected
+    <span class="g">✓</span> Dependencies installed
+    <span class="g">✓</span> Claude Code installed
+    <span class="g">✓</span> Claude authenticated
+
+<span class="gr">  Should Claude ask before making changes?</span>
+<span class="a">  → No, let it work freely</span> <span class="d">(recommended)</span>
+<span class="w">    Yes, ask me first</span></pre>
+  </div>
+  <div class="sa">↓</div>
+  <div class="tl">Screen 5 — Launching onboarding agent <span class="mt mt-c">Console</span></div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  You're all set!</span>
+
+<span class="gr">  Launching your first session...</span>
+    <span class="a">●</span> Launching welcome on beast...</pre>
+  </div>
+  <div class="sa">↓ SSH attach</div>
+  <div class="tl">Screen 6 — Onboarding agent <span class="mt mt-s">SSH</span></div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c">  <span class="d">Connected to welcome on beast</span>
+  <span class="d">Ctrl+B D to detach · run beefy to manage agents</span>
+
+  Hey! I'm Claude, running on a machine with 16 cores
+  and 64GB of RAM.
+
+  This session is persistent — even if you close
+  your terminal, I'll still be here.
+
+  Want to try? Here's a quick experiment:
+
+  <span class="w">1.</span> Press <span class="a">Ctrl+B D</span> to detach from this session
+  <span class="w">2.</span> Run <span class="a">beefy</span> to see me in your agent list
+  <span class="w">3.</span> Press Enter to reconnect
+
+  Go ahead — I'll wait right here.</pre>
+  </div>
+  <div class="sa">↓ user detaches</div>
+  <div class="tl">Screen 7 — Agent picker <span class="mt mt-t">TUI</span></div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c">  1 Agent
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="a">●</span> welcome       —              <span class="a">waiting input</span>       <span class="d">now</span></span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">welcome</div>
+      <div class="pq">"Go ahead — I'll wait right here."</div>
+      <div class="pm"><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">t</span> Reply<br><span class="w">⏎</span> Connect<br><span class="w">d</span> Delete</div>
+    </div>
+  </div></div>
+
+  <div class="tl">Push notification (60s later)</div>
+  <div class="t" style="background:#2d2d2f;border:1px solid #424245;max-width:360px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;font-family:system-ui">
+      <span style="font-size:14px">🐄</span>
+      <span class="w" style="font-size:12px;font-weight:500">beefy</span>
+      <span class="d" style="font-size:11px;margin-left:auto">now</span>
+    </div>
+    <div class="w" style="font-size:13px;font-family:system-ui">welcome needs your input</div>
+    <div class="gr" style="font-size:12px;font-family:system-ui">"What would you like to build first?"</div>
+  </div>
+
+  <div class="dv"></div>
+  <h3>Setup error <span class="mt mt-c">Console</span></h3>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Setting up your machine</span>
+
+    <span class="g">✓</span> Connected
+    <span class="r">✗</span> <span class="r">Failed to install dependencies</span>
+      <span class="gr">apt-get: permission denied</span>
+      <span class="gr">Make sure the user has sudo access.</span>
+
+    <span class="w">r</span> <span class="d">Retry</span>   <span class="d">q quit</span></pre>
+  </div>
+  <p class="note">Retry is idempotent. User can also fix and run <code>beefy machine setup</code> later.</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 6: MACHINE HEALTH                                        -->
+<!-- ============================================================ -->
+<div id="tab-machine" class="tab-content">
+  <h2>Machine Health <span class="mt mt-t">TUI</span></h2>
+  <p class="sub">Banners at top of picker. Git issues appear as regular "waiting input."</p>
+
+  <div class="tl">Needs upgrade</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="a">  ⚠ beast needs upgrade (v0.3 → v0.4) — press u</span>
+
+  3 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="g">●</span> backend       myproject      <span class="gr">running</span>             <span class="d">now</span></span>
+   <span class="g">●</span> worker        myproject      <span class="gr">idle</span>                <span class="d">20m</span>
+   <span class="d">○ research      —              stopped             2d</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">⏎</span> Connect  <span class="w">n</span> New agent  <span class="w">s</span> Quick session  <span class="w">u</span> Upgrade</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">backend</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Running for 45 minutes</div>
+      <div class="pm"><div><span>Project</span>  myproject</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">⏎</span> Connect<br><span class="w">x</span> Stop<br><span class="w">r</span> Rename</div>
+    </div>
+  </div></div>
+
+  <div class="tl">Offline</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="r">  ✗ beast is unreachable — press k to troubleshoot</span>
+
+  3 Agents
+<span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="r">●</span> backend       myproject      <span class="r">unreachable</span>         <span class="d">12m</span></span>
+   <span class="r">●</span> worker        myproject      <span class="r">unreachable</span>         <span class="d">12m</span>
+   <span class="r">●</span> research      —              <span class="r">unreachable</span>         <span class="d">12m</span>
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">k</span> Troubleshoot  <span class="w">n</span> New agent  <span class="w">s</span> Quick session</pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">backend</div>
+      <div class="r" style="margin-bottom:16px;font-size:12px">Machine unreachable</div>
+      <div class="pm"><div><span>Project</span>  myproject</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">k</span> Check connection<br><span class="w">r</span> Rename<br><span class="w">d</span> Delete</div>
+    </div>
+  </div></div>
+  <p class="note">Press <code>k</code> → re-tests SSH. If auth fails → shows key picker (same as onboarding). If timeout → "Machine may be powered off." CLI: <code>beefy machine key</code>.</p>
+
+  <div class="tl">Needs setup</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="a">  ⚠ beast needs setup — press s</span>
+
+  0 Agents
+
+    No agents yet — finish setup to get started.
+
+<span class="d">─────────────────────────────────────────────────────────</span>
+  <span class="w">s</span> Setup beast</pre>
+    </div>
+    <div class="tl-r" style="color:#484f58;display:flex;align-items:center;justify-content:center;font-size:12px;text-align:center;line-height:1.6">Select an agent<br>to see details</div>
+  </div></div>
+  <p class="note">Machine registered but setup incomplete. Press <code>s</code> to run setup (same as <code>beefy machine setup</code>).</p>
+
+  <p class="note" style="margin-top:24px">Git/GitHub issues: no special status. Claude asks for help → appears as "waiting input" with git error. User runs <code>beefy machine auth</code> to fix.</p>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 7: PROJECTS                                              -->
+<!-- ============================================================ -->
+<div id="tab-projects" class="tab-content">
+  <h2>Projects <span class="mt mt-t">TUI</span> + <span class="mt mt-c">CLI</span></h2>
+  <p class="sub">Save as project (TUI), delete project (CLI only), edge cases.</p>
+
+  <h3>Save as project — from picker</h3>
+  <div class="tl">Before — press p</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="d">○ research      —              stopped             2d</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">research</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Stopped 2 days ago<br>14 files in folder</div>
+      <div class="pa"><span class="w">⏎</span> Reconnect<br><span class="w">p</span> Save as project<br><span class="w">r</span> Rename<br><span class="w">d</span> Delete <span class="d">(removes files)</span></div>
+    </div>
+  </div></div>
+  <div class="sa">↓ press p</div>
+  <div class="tl">Name input in panel</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="d">○ research      —              stopped             2d</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">Save as project</div>
+      <div class="gr" style="margin-bottom:8px;font-size:12px">Name this project</div>
+      <div class="ii" style="max-width:170px">research█</div>
+      <div style="margin-top:8px;font-size:11px;color:#484f58"><span class="w">⏎</span> Save<br><span class="w">esc</span> Cancel</div>
+    </div>
+  </div></div>
+  <div class="sa">↓ press ⏎</div>
+  <div class="tl">After — project column updates</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="d">○ research      research       stopped             2d</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">research</div>
+      <div class="gr" style="margin-bottom:16px;font-size:12px">Stopped 2 days ago</div>
+      <div class="pm"><div><span>Project</span>  research</div><div><span>Machine</span>  beast</div></div>
+      <div class="pa"><span class="w">⏎</span> Reconnect<br><span class="w">r</span> Rename<br><span class="w">d</span> Delete</div>
+    </div>
+  </div></div>
+
+  <div class="tl">Name collision — project name taken</div>
+  <div class="t"><div class="ts">
+    <div class="tl-l">
+<pre class="c"><span class="d">    AGENT          PROJECT        STATUS             ACTIVE</span>
+<span class="rs"><span class="w"> →</span> <span class="d">○ research      —              stopped             2d</span></span></pre>
+    </div>
+    <div class="tl-r">
+      <div class="pt">Save as project</div>
+      <div class="ii" style="max-width:170px;border-color:#f85149">myproject█</div>
+      <div class="r" style="margin-top:4px;font-size:11px">Project name already in use</div>
+      <div style="margin-top:8px;font-size:11px;color:#484f58"><span class="w">⏎</span> Save<br><span class="w">esc</span> Cancel</div>
+    </div>
+  </div></div>
+
+  <div class="dv"></div>
+  <h3>Delete project — CLI only</h3>
+  <p class="sub">Projects are managed via CLI. No TUI project management in MVP.</p>
+
+  <div class="tl">No agents in project</div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c"><span class="d">$ beefy project rm research</span>
+  Remove project 'research'? Files stay on beast. <span class="d">[y/N]</span> y
+  <span class="g">✓</span> Project removed</pre>
+  </div>
+  <p class="note">Files stay on remote machine. Only the project reference is removed from beefy.</p>
+
+  <div class="tl">Agents running in project</div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c"><span class="d">$ beefy project rm myproject</span>
+  <span class="a">⚠ 2 agents are running in 'myproject'.</span>
+  <span class="a">  They will become standalone sessions.</span>
+  Remove project? <span class="d">[y/N]</span> y
+  <span class="g">✓</span> Project removed. 2 agents are now standalone.</pre>
+  </div>
+  <p class="note">Agents keep running but project column → "—". They can be promoted again later.</p>
+
+  <div class="tl">Force delete</div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c"><span class="d">$ beefy project rm myproject -f</span>
+  <span class="g">✓</span> Project removed. 2 agents are now standalone.</pre>
+  </div>
+
+  <div class="dv"></div>
+  <h3>Edge cases</h3>
+  <div class="fb">
+    <div class="s"><b>Delete session with files from TUI</b></div>
+    <div class="ar">↓</div>
+    <div class="s">Panel shows: "Remove research? 14 files will be deleted."</div>
+    <div class="br">└ Extra option: <code>p</code> Save as project first</div>
+    <div class="br">└ <code>esc</code> cancel</div>
+  </div>
+  <div class="fb">
+    <div class="s"><b>Agent name collision on rename</b></div>
+    <div class="ar">↓</div>
+    <div class="s">Red border + "Name already in use" — must pick unique name</div>
+    <div class="br">└ Names are unique per machine. Single machine = globally unique.</div>
+  </div>
+  <div class="fb">
+    <div class="s"><b>Project name collision on save</b></div>
+    <div class="ar">↓</div>
+    <div class="s">Red border + "Project name already in use" — must pick unique name</div>
+    <div class="br">└ CLI: <code>beefy project save research -n my-research</code></div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB 8: CLI COMMANDS                                          -->
+<!-- ============================================================ -->
+<div id="tab-cli" class="tab-content">
+  <h2>CLI Commands — MVP</h2>
+  <p class="sub">Complete reference. Every TUI action has a CLI equivalent.<br>
+  <span class="mt mt-t">TUI</span> = full-screen interactive &nbsp;
+  <span class="mt mt-c">Console</span> = scrolling output &nbsp;
+  <span class="mt mt-s">SSH</span> = replaces process with SSH &nbsp;
+  <span style="color:#0a84ff;font-size:11px">● interactive</span> = has prompts/pickers &nbsp;
+  <span style="color:#30d158;font-size:11px">⚡ scriptable</span> = can skip all prompts with flags</p>
+
+  <h3>Daily use</h3>
+  <table class="cmd">
+    <tr><th style="min-width:280px">Command</th><th>Description</th><th>Notes</th><th>Scripting</th></tr>
+    <tr>
+      <td>beefy</td>
+      <td><span class="mt mt-t">TUI</span> <span style="color:#0a84ff;font-size:11px">● interactive</span><br>Open agent picker</td>
+      <td>No args. Main screen.</td>
+      <td><span style="color:#636366">n/a — TUI only</span></td>
+    </tr>
+    <tr>
+      <td>beefy start<br><span style="color:#484f58;font-size:11px">  -p &lt;project&gt; <span style="color:#636366">optional</span><br>  --clone &lt;url&gt; <span style="color:#636366">optional</span><br>  -n &lt;name&gt; <span style="color:#636366">optional, overrides auto</span><br>  -m &lt;machine&gt; <span style="color:#636366">optional, multi-machine</span><br>  -d <span style="color:#636366">optional, detach</span></span></td>
+      <td><span class="mt mt-c">Console</span>→<span class="mt mt-s">SSH</span><br>Launch a new agent session</td>
+      <td>No flags = quick session (auto-name, default machine).<br><code>-p</code> = launch in existing project.<br><code>--clone</code> = clone repo first. <span style="color:#0a84ff;font-size:11px">● interactive</span> if GitHub setup needed.<br><code>-d</code> = don't connect after creation (prints agent name).<br>Without <code>-p</code> or <code>--clone</code>: not interactive.</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>-d</code> for detach.<br>If GitHub not configured + <code>--clone</code>: errors with "run <code>beefy machine auth github</code> first" instead of interactive setup.</td>
+    </tr>
+    <tr>
+      <td>beefy connect &lt;name&gt;<br><span style="color:#484f58;font-size:11px">  name <span style="color:#f85149">required</span><br>  -m &lt;machine&gt; <span style="color:#636366">optional, disambiguate</span></span></td>
+      <td><span class="mt mt-s">SSH</span><br>Attach to running agent</td>
+      <td>Not interactive. Replaces process with SSH. Error if agent not found.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy ls<br><span style="color:#484f58;font-size:11px">  --waiting <span style="color:#636366">optional, filter</span><br>  --json <span style="color:#636366">optional, format</span><br>  -m &lt;machine&gt; <span style="color:#636366">optional, filter</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>List agents</td>
+      <td>Not interactive. Table output. <code>--waiting</code> = only agents needing attention. <code>--json</code> = machine-readable.</td>
+      <td>—</td>
+    </tr>
+  </table>
+
+  <h3>Agent actions — all non-interactive (except rm)</h3>
+  <table class="cmd">
+    <tr><th style="min-width:280px">Command</th><th>Description</th><th>Edge cases</th><th>Scripting</th></tr>
+    <tr>
+      <td>beefy reply &lt;name&gt; "&lt;text&gt;"<br><span style="color:#484f58;font-size:11px">  name <span style="color:#f85149">required</span><br>  text <span style="color:#f85149">required</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Send text reply to waiting agent</td>
+      <td>Error if agent not "waiting input." Sent via daemon → tmux send-keys.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy allow &lt;name&gt;<br><span style="color:#484f58;font-size:11px">  name <span style="color:#f85149">required</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Approve permission</td>
+      <td>Error if agent not "needs perm."</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy deny &lt;name&gt;<br><span style="color:#484f58;font-size:11px">  name <span style="color:#f85149">required</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Deny permission</td>
+      <td>Error if not "needs perm." TUI: <code>d</code> on permission agents.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy stop &lt;name&gt;<br><span style="color:#484f58;font-size:11px">  name <span style="color:#f85149">required</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Stop a running/idle agent</td>
+      <td>No-op if already stopped. Kills the Claude process.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy rename &lt;old&gt; &lt;new&gt;<br><span style="color:#484f58;font-size:11px">  old <span style="color:#f85149">required</span><br>  new <span style="color:#f85149">required</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Rename agent</td>
+      <td>Error if new name taken. Names unique per machine.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy rm &lt;name&gt;<br><span style="color:#484f58;font-size:11px">  name <span style="color:#f85149">required</span><br>  -f <span style="color:#636366">optional, skip confirm</span></span></td>
+      <td><span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span> (confirm)<br>Remove agent</td>
+      <td>Running agent: "Stop and remove?" Standalone with files: "14 files will be deleted." <code>-f</code> skips all prompts.</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>-f</code> skips all confirms</td>
+    </tr>
+  </table>
+
+  <h3>Machine management</h3>
+  <table class="cmd">
+    <tr><th style="min-width:280px">Command</th><th>Description</th><th>Notes</th><th>Scripting</th></tr>
+    <tr>
+      <td>beefy machine new &lt;host&gt;<br><span style="color:#484f58;font-size:11px">  host <span style="color:#f85149">required</span> <span style="color:#636366">(user@host)</span><br>  --name &lt;name&gt; <span style="color:#636366">optional, override auto</span><br>  -k &lt;key&gt; <span style="color:#636366">optional, SSH key path</span><br>  --permissions ask|yolo <span style="color:#636366">optional</span><br>  --skip-auth <span style="color:#636366">optional, defer auth</span><br>  -y <span style="color:#636366">optional, auto-confirm</span></span></td>
+      <td><span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span><br>Register + full setup</td>
+      <td>Prompts: key picker (if auth fails), Claude auth (copy?), permission toggle. Machine name auto-derived from hostname. No GitHub in setup.</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>-k &lt;key&gt; --permissions ask -y</code> → no prompts.<br><code>--skip-auth</code> defers Claude/GitHub to later.<br><code>--name</code> overrides auto name.</td>
+    </tr>
+    <tr>
+      <td>beefy machine setup [name]<br><span style="color:#484f58;font-size:11px">  name <span style="color:#636366">optional, auto if 1 machine</span><br>  -y <span style="color:#636366">optional, auto-confirm</span><br>  --skip-auth <span style="color:#636366">optional, defer auth</span></span></td>
+      <td><span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span><br>Re-run setup (idempotent)</td>
+      <td>Skips completed steps. May prompt for Claude auth if not done.</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>-y</code> auto-confirms.<br><code>--skip-auth</code> skips auth prompts.</td>
+    </tr>
+    <tr>
+      <td>beefy machine auth [name]<br><span style="color:#484f58;font-size:11px">  name <span style="color:#636366">optional</span><br>  -y <span style="color:#636366">optional, auto-confirm</span></span></td>
+      <td><span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span><br>Claude + GitHub auth (both)</td>
+      <td>Runs Claude copy + GitHub key verify. Prompts for each.</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>-y</code> auto-confirms all steps</td>
+    </tr>
+    <tr>
+      <td>beefy machine auth claude [name]<br><span style="color:#484f58;font-size:11px">  -y <span style="color:#636366">optional, auto-confirm</span></span></td>
+      <td><span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span><br>Copy Claude credentials only</td>
+      <td>Prompt: "Copy my setup?" May require system password (macOS Keychain).</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>-y</code> auto-confirms</td>
+    </tr>
+    <tr>
+      <td>beefy machine auth github [name]<br><span style="color:#484f58;font-size:11px">  -y <span style="color:#636366">optional, auto-confirm</span></span></td>
+      <td><span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span><br>GitHub SSH setup on remote</td>
+      <td>Shows remote SSH key. User adds to GitHub. Prompt: "Verify access?"</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>-y</code> skips verification prompt</td>
+    </tr>
+    <tr>
+      <td>beefy machine key [name]<br><span style="color:#484f58;font-size:11px">  -k &lt;path&gt; <span style="color:#636366">optional, specify key</span></span></td>
+      <td><span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span><br>Update local SSH key for connecting</td>
+      <td>Shows available keys, user picks one, tests connection. Fixes auth failures.</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>-k &lt;path&gt;</code> → no picker, sets key directly</td>
+    </tr>
+    <tr>
+      <td>beefy machine default &lt;name&gt;<br><span style="color:#484f58;font-size:11px">  name <span style="color:#f85149">required</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Set the default machine</td>
+      <td>Stored in local config. All commands without <code>-m</code> use this. TUI shows this machine's agents.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy machine upgrade [name]</td>
+      <td><span class="mt mt-c">Console</span><br>Upgrade daemon binary</td>
+      <td>Not interactive. Stages binary + restarts daemon.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy machine ssh [name]</td>
+      <td><span class="mt mt-s">SSH</span><br>SSH into the machine directly</td>
+      <td>Not interactive. Opens raw SSH session (no tmux/agent). For debugging.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy machine rm [name]<br><span style="color:#484f58;font-size:11px">  -f <span style="color:#636366">optional, skip confirm</span></span></td>
+      <td><span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span> (confirm)<br>Remove machine + agents</td>
+      <td>Warns: "This will remove 5 agents." <code>-f</code> skips.</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>-f</code> skips all confirms</td>
+    </tr>
+    <tr>
+      <td>beefy machine ls</td>
+      <td><span class="mt mt-c">Console</span><br>List machines with health</td>
+      <td>Not interactive. Shows: name, host, status (ready/offline/needs setup), agent count.</td>
+      <td>—</td>
+    </tr>
+  </table>
+  <p class="note"><code>[name]</code> = optional if 1 machine (auto-selected). Required if 2+ machines and no default set.<br>
+  <b>Non-TTY detection:</b> When stdin is not a terminal, interactive commands error with a message naming the missing flag instead of hanging.</p>
+
+  <h3>Project management — all CLI only (no TUI project view)</h3>
+  <table class="cmd">
+    <tr><th style="min-width:280px">Command</th><th>Description</th><th>Edge cases</th><th>Scripting</th></tr>
+    <tr>
+      <td>beefy project save &lt;agent&gt;<br><span style="color:#484f58;font-size:11px">  agent <span style="color:#f85149">required</span> <span style="color:#636366">(agent name)</span><br>  -n &lt;name&gt; <span style="color:#636366">optional, project name</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Promote session to project</td>
+      <td>Project name defaults to agent name. Error if agent already in a project. Error if project name taken — use <code>-n</code>.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy project rm &lt;name&gt;<br><span style="color:#484f58;font-size:11px">  name <span style="color:#f85149">required</span><br>  -f <span style="color:#636366">optional, skip confirm</span></span></td>
+      <td><span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span> (confirm)<br>Remove project reference</td>
+      <td>Files stay on remote. Running agents become standalone. Warns if agents exist.</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>-f</code> skips all confirms</td>
+    </tr>
+    <tr>
+      <td>beefy project ls</td>
+      <td><span class="mt mt-c">Console</span><br>List projects</td>
+      <td>Shows: name, machine, agent count, path.</td>
+      <td>—</td>
+    </tr>
+  </table>
+
+  <h3>Notifications (global, provider-agnostic)</h3>
+  <p class="note">Notification rules apply to any provider (Telegram now, Slack/email later). All take optional <code>-m &lt;machine&gt;</code>.</p>
+  <table class="cmd">
+    <tr><th style="min-width:280px">Command</th><th>Description</th><th>Notes</th><th>Scripting</th></tr>
+    <tr>
+      <td>beefy notify<br><span style="color:#484f58;font-size:11px">  --json <span style="color:#636366">optional, format</span><br>  -m &lt;machine&gt; <span style="color:#636366">optional</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Show notification config</td>
+      <td>Shows: provider, delay, status (active/paused/not configured).</td>
+      <td><code>--json</code> for parsing</td>
+    </tr>
+    <tr>
+      <td>beefy notify set delay &lt;duration&gt;<br><span style="color:#484f58;font-size:11px">  duration <span style="color:#f85149">required</span> <span style="color:#636366">(30s, 2m, 5m)</span><br>  -m &lt;machine&gt; <span style="color:#636366">optional</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Set notification delay</td>
+      <td>How long an agent waits before buzzing you. Default: <code>2m</code>.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy notify pause<br><span style="color:#484f58;font-size:11px">  -m &lt;machine&gt; <span style="color:#636366">optional</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Mute notifications</td>
+      <td>Idempotent. No-op if already paused.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy notify resume<br><span style="color:#484f58;font-size:11px">  -m &lt;machine&gt; <span style="color:#636366">optional</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Unmute notifications</td>
+      <td>Error if no provider configured.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy notify test<br><span style="color:#484f58;font-size:11px">  -m &lt;machine&gt; <span style="color:#636366">optional</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Send test notification</td>
+      <td>Error if no provider or paused.</td>
+      <td>—</td>
+    </tr>
+  </table>
+
+  <h3>Telegram (provider)</h3>
+  <p class="note">Telegram-specific setup and connection management. See <b>Telegram</b> tab for UX flows and message designs.</p>
+  <table class="cmd">
+    <tr><th style="min-width:280px">Command</th><th>Description</th><th>Notes</th><th>Scripting</th></tr>
+    <tr>
+      <td>beefy telegram setup<br><span style="color:#484f58;font-size:11px">  --token &lt;token&gt; <span style="color:#636366">optional, skip prompt</span><br>  -m &lt;machine&gt; <span style="color:#636366">optional</span></span></td>
+      <td><span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span><br>Token + pair + set defaults</td>
+      <td>Guided: (1) BotFather instructions + token, (2) pairing code + wait, (3) notification delay. Already configured → warns. <code>--token</code> overwrites silently.</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>--token &lt;tok&gt;</code> → saves token, prints code, exits. Pair with <code>beefy telegram pair</code>.<br>Non-TTY without <code>--token</code>: error.</td>
+    </tr>
+    <tr>
+      <td>beefy telegram pair &lt;code&gt;<br><span style="color:#484f58;font-size:11px">  code <span style="color:#f85149">required</span><br>  -m &lt;machine&gt; <span style="color:#636366">optional</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Approve pairing code</td>
+      <td>Sends test notification on success. Error if code expired or no token.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy telegram status<br><span style="color:#484f58;font-size:11px">  --json <span style="color:#636366">optional, format</span><br>  -m &lt;machine&gt; <span style="color:#636366">optional</span></span></td>
+      <td><span class="mt mt-c">Console</span><br>Show Telegram connection</td>
+      <td>Bot name, paired user, active/waiting/not configured.</td>
+      <td><code>--json</code> for parsing</td>
+    </tr>
+    <tr>
+      <td>beefy telegram rm<br><span style="color:#484f58;font-size:11px">  -f <span style="color:#636366">optional, skip confirm</span><br>  -m &lt;machine&gt; <span style="color:#636366">optional</span></span></td>
+      <td><span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span> (confirm)<br>Remove Telegram config</td>
+      <td>Removes token + pairing. <code>-f</code> skips confirm.</td>
+      <td><span style="color:#30d158;font-size:11px">⚡</span> <code>-f</code> skips confirm</td>
+    </tr>
+  </table>
+
+  <h3>Utility</h3>
+  <table class="cmd">
+    <tr><th style="min-width:280px">Command</th><th>Description</th><th></th><th>Scripting</th></tr>
+    <tr>
+      <td>beefy config</td>
+      <td><span class="mt mt-c">Console</span><br>Print config JSON</td>
+      <td>Shows: default machine, permission setting, config path.</td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy config edit</td>
+      <td>Opens config in $EDITOR</td>
+      <td></td>
+      <td>—</td>
+    </tr>
+    <tr>
+      <td>beefy version</td>
+      <td><span class="mt mt-c">Console</span><br>Print version</td>
+      <td>Shows client + daemon version (if connected).</td>
+      <td>—</td>
+    </tr>
+  </table>
+
+  <div class="dv"></div>
+  <h3>Name uniqueness &amp; generation</h3>
+  <p class="sub">All entity names must be unique within their scope. The client sends a <b>name hint</b>, the backend resolves uniqueness.</p>
+
+  <table class="cmd">
+    <tr><th>Entity</th><th>Unique within</th><th>Auto-generated from</th><th>Override flag</th><th>Collision behavior</th></tr>
+    <tr>
+      <td><b>Agent</b></td>
+      <td>Per machine</td>
+      <td>Project name or "session"</td>
+      <td><code>-n &lt;name&gt;</code></td>
+      <td>Hint: daemon appends <code>-2</code>, <code>-3</code>.<br>Override (<code>-n</code>): error if taken.</td>
+    </tr>
+    <tr>
+      <td><b>Project</b></td>
+      <td>Per machine</td>
+      <td>Repo name (clone) or agent name (save)</td>
+      <td><code>-n &lt;name&gt;</code> on <code>project save</code></td>
+      <td>Hint: daemon appends <code>-2</code>, <code>-3</code>.<br>Override (<code>-n</code>): error if taken.</td>
+    </tr>
+    <tr>
+      <td><b>Machine</b></td>
+      <td>Global (local config)</td>
+      <td>Hostname from user@host</td>
+      <td><code>--name &lt;name&gt;</code> on <code>machine new</code></td>
+      <td>Hint: client appends <code>-2</code>, <code>-3</code>.<br>Override (<code>--name</code>): error if taken.</td>
+    </tr>
+  </table>
+
+  <div class="fb" style="margin-top:12px">
+    <div class="s"><b>How it works:</b> Client always sends a <code>name_hint</code>, never a final name. The backend (daemon for agents/projects, local config for machines) resolves collisions and returns the actual name.</div>
+    <div class="s" style="margin-top:8px"><b>User sees:</b> "Launching myproject-2 on beast..." — the resolved name appears after the backend responds.</div>
+    <div class="s" style="margin-top:8px"><b>Override:</b> When user passes <code>-n</code> or <code>--name</code>, the exact name is sent instead of a hint. Backend errors if taken — no auto-suffix.</div>
+    <div class="s" style="margin-top:8px"><b>Rename collisions:</b> <code>beefy rename old new</code> errors if <code>new</code> is taken. Same for project names.</div>
+  </div>
+
+  <div class="dv"></div>
+  <h3>TUI → CLI mapping</h3>
+  <table class="cmd">
+    <tr><th>TUI</th><th>CLI</th></tr>
+    <tr><td><code>s</code> Quick session</td><td><code>beefy start</code></td></tr>
+    <tr><td><code>n</code> → project</td><td><code>beefy start -p &lt;name&gt;</code></td></tr>
+    <tr><td><code>n</code> → Quick session</td><td><code>beefy start</code></td></tr>
+    <tr><td><code>n</code> → Clone</td><td><code>beefy start --clone &lt;url&gt;</code></td></tr>
+    <tr><td><code>⏎</code> Connect</td><td><code>beefy connect &lt;name&gt;</code></td></tr>
+    <tr><td><code>t</code> Reply</td><td><code>beefy reply &lt;name&gt; "text"</code></td></tr>
+    <tr><td><code>y</code> Approve</td><td><code>beefy allow &lt;name&gt;</code></td></tr>
+    <tr><td><code>d</code> Deny (on permission agent)</td><td><code>beefy deny &lt;name&gt;</code></td></tr>
+    <tr><td><code>d</code> Delete (on other agents)</td><td><code>beefy rm &lt;name&gt;</code></td></tr>
+    <tr><td><code>x</code> Stop</td><td><code>beefy stop &lt;name&gt;</code></td></tr>
+    <tr><td><code>r</code> Rename</td><td><code>beefy rename &lt;old&gt; &lt;new&gt;</code></td></tr>
+    <tr><td><code>p</code> Save as project</td><td><code>beefy project save &lt;agent&gt;</code></td></tr>
+    <tr><td><code>u</code> Upgrade</td><td><code>beefy machine upgrade</code></td></tr>
+    <tr><td><code>k</code> Troubleshoot connection</td><td><code>beefy machine key</code></td></tr>
+  </table>
+
+  <div class="dv"></div>
+  <h3>Error examples <span class="mt mt-c">Console</span></h3>
+  <div class="tl">Agent not found</div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c"><span class="d">$ beefy connect oops</span>
+  <span class="r">✗</span> Agent 'oops' not found
+  <span class="d">Run: beefy ls</span></pre>
+  </div>
+  <div class="tl">Reply to non-waiting agent</div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c"><span class="d">$ beefy reply backend "do this"</span>
+  <span class="r">✗</span> Agent 'backend' is running, not waiting for input
+  <span class="d">Use: beefy connect backend</span></pre>
+  </div>
+  <div class="tl">Allow on non-permission agent</div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c"><span class="d">$ beefy allow test-fixer</span>
+  <span class="r">✗</span> Agent 'test-fixer' is waiting for input, not permission
+  <span class="d">Use: beefy reply test-fixer "your answer"</span></pre>
+  </div>
+  <div class="tl">Name collision</div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c"><span class="d">$ beefy rename backend worker</span>
+  <span class="r">✗</span> Name 'worker' is already in use</pre>
+  </div>
+  <div class="tl">Delete with file warning</div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c"><span class="d">$ beefy rm research</span>
+  <span class="a">⚠ research has 14 files but no project.</span>
+  <span class="a">  Files will be permanently deleted.</span>
+  Delete? <span class="d">[y/N]</span> <span class="d">█</span></pre>
+  </div>
+  <div class="tl">Project save — agent already in project</div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c"><span class="d">$ beefy project save backend</span>
+  <span class="r">✗</span> Agent 'backend' is already in project 'myproject'</pre>
+  </div>
+  <div class="tl">Scripting examples</div>
+  <div class="t" style="color:#c9d1d9">
+<pre class="c"><span class="d"># Approve all pending permissions</span>
+$ beefy ls --json | jq -r '.[] | select(.status=="needs_perm") | .name' \
+  | xargs -I{} beefy allow {}
+
+<span class="d"># Launch 3 detached agents</span>
+$ for i in 1 2 3; do beefy start -p myproject -d; done
+
+<span class="d"># Quick reply from terminal</span>
+$ beefy reply test-fixer "Just fix the failing test"</pre>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- TAB: TELEGRAM — UX FLOWS & MESSAGE DESIGN                    -->
+<!-- ============================================================ -->
+<style>
+  .tg { max-width: 300px; background: #1a1a1a; border-radius: 16px; border: 1px solid #333; overflow: hidden; font-family: system-ui, -apple-system, sans-serif; }
+  .tg-h { background: #232323; padding: 8px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid #333; }
+  .tg-av { width: 24px; height: 24px; border-radius: 50%; background: linear-gradient(135deg, #d29922, #8b6914); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0; }
+  .tg-n { font-size: 12px; font-weight: 600; color: #f5f5f7; }
+  .tg-b { padding: 10px; display: flex; flex-direction: column; gap: 6px; }
+  .tg-m { max-width: 250px; padding: 7px 10px; border-radius: 10px; font-size: 11.5px; line-height: 1.5; }
+  .tg-in { background: #2a2a2a; color: #e0e0e0; border-bottom-left-radius: 3px; align-self: flex-start; }
+  .tg-out { background: #0a84ff; color: #fff; border-bottom-right-radius: 3px; align-self: flex-end; }
+  .tg-t { font-size: 9px; color: #555; margin-top: 2px; }
+  .tg-tr { font-size: 9px; color: rgba(255,255,255,0.4); margin-top: 2px; text-align: right; }
+  .tg-q { border-left: 2px solid #555; padding-left: 6px; margin-bottom: 3px; font-size: 10px; color: #777; }
+  .tg-btns { margin-top: 6px; display: flex; gap: 6px; }
+  .tg-btn { flex: 1; text-align: center; padding: 7px 0; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: default; letter-spacing: 0.2px; }
+  .tg-btn-approve { background: linear-gradient(180deg, rgba(210,153,34,0.18) 0%, rgba(210,153,34,0.08) 100%); color: #d29922; border: 1px solid rgba(210,153,34,0.35); }
+  .tg-btn-deny { background: rgba(140,140,140,0.06); color: #888; border: 1px solid rgba(140,140,140,0.2); }
+  .tg-btn-pressed { opacity: 0.25; }
+  .tg-btn-active { background: linear-gradient(180deg, rgba(210,153,34,0.28) 0%, rgba(210,153,34,0.14) 100%); border-color: rgba(210,153,34,0.5); box-shadow: 0 0 8px rgba(210,153,34,0.15); }
+  .tg-btn-active-deny { background: rgba(248,81,73,0.12); color: #f85149; border-color: rgba(248,81,73,0.3); box-shadow: 0 0 8px rgba(248,81,73,0.1); }
+  .tg-hint { color: #666; font-size: 10px; margin-top: 4px; }
+  .tg-tool { margin-top: 4px; padding: 5px 8px; background: #1a1a1a; border: 1px solid #333; border-radius: 6px; font-size: 10.5px; color: #ccc; font-family: 'SF Mono', Monaco, monospace; }
+  .side { display: flex; gap: 16px; align-items: flex-start; margin: 12px 0 8px 0; }
+  .side-term { flex: 1; min-width: 0; }
+  .side-tg { flex-shrink: 0; }
+</style>
+
+<div id="tab-telegram" class="tab-content">
+  <h2>Telegram Notifications</h2>
+  <p class="sub">Agents ping your phone when they need you. Reply, approve, or deny from Telegram.<br>
+  CLI reference: see <b>CLI Commands</b> tab → Notifications &amp; Telegram sections.<br>
+  Spec: <code>mvp/v0/telegram-notifications-spec-mvp-v0.md</code></p>
+
+  <!-- ═══ SETUP FLOW ═══ -->
+  <h3>Setup flow <span class="mt mt-c">Console</span> <span style="color:#0a84ff;font-size:11px">● interactive</span> <span style="color:#30d158;font-size:11px">⚡ scriptable</span></h3>
+  <p class="note">One-time. User creates a bot via @BotFather (60s), then pairs it. Scrolling output — no screen clearing.</p>
+
+  <div class="tl">Screen 1 — Create your bot <span class="mt mt-c">Console</span></div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Set up Telegram notifications</span>
+
+<span class="gr">  You need a Telegram bot. Here's how to make one (60 seconds):</span>
+
+    <span class="w">1.</span> Open Telegram and search for <span class="a">@BotFather</span>
+    <span class="w">2.</span> Send <span class="a">/newbot</span> and follow the prompts
+    <span class="w">3.</span> Copy the bot token it gives you
+
+<span class="gr">  Paste your bot token:</span>
+  <span class="a">▸</span> <span class="w">7891234567:AAH_xxxxxxxxxxxxxxxxxxxxxxxxxxxx█</span></pre>
+  </div>
+
+  <div class="tl">Screen 1a — Invalid token format</div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Set up Telegram notifications</span>
+
+<span class="gr">  You need a Telegram bot. Here's how to make one (60 seconds):</span>
+
+    <span class="w">1.</span> Open Telegram and search for <span class="a">@BotFather</span>
+    <span class="w">2.</span> Send <span class="a">/newbot</span> and follow the prompts
+    <span class="w">3.</span> Copy the bot token it gives you
+
+<span class="gr">  Paste your bot token:</span>
+  <span class="a">▸</span> <span class="w">not-a-real-token</span>
+
+    <span class="r">✗</span> <span class="r">That doesn't look like a bot token.</span>
+      <span class="gr">Tokens look like: 123456789:AAHxxxxxxxxxx</span>
+      <span class="gr">Get one from @BotFather → /newbot</span>
+
+<span class="gr">  Paste your bot token:</span>
+  <span class="a">▸</span> <span class="d">█</span></pre>
+  </div>
+  <p class="note">Token format: <code>^\d+:AA[A-Za-z0-9_-]+$</code>. User can retry immediately — same UX as SSH host retry in onboarding.</p>
+
+  <div class="tl">Screen 1b — Daemon unreachable</div>
+  <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Set up Telegram notifications</span>
+
+    <span class="r">✗</span> <span class="r">Could not save token — hive is unreachable</span>
+
+      <span class="gr">Check that:</span>
+      <span class="gr">• The machine is online</span>
+      <span class="gr">• The daemon is running</span>
+
+    <span class="w">r</span> <span class="d">Retry</span>   <span class="w">e</span> <span class="d">Edit token</span>   <span class="d">q quit</span></pre>
+  </div>
+  <p class="note">Same retry / edit / quit pattern as machine setup SSH failure (see Onboarding tab, Screen 2c).</p>
+
+  <div class="sa">↓</div>
+  <div class="tl">Screen 2 — Pairing <span class="mt mt-c">Console</span></div>
+  <div class="side">
+    <div class="side-term">
+      <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Set up Telegram notifications</span>
+
+    <span class="g">✓</span> Token saved to hive
+
+<span class="gr">  Now open your bot in Telegram and send this code:</span>
+
+    <span class="a" style="font-size:14px;letter-spacing:2px;font-weight:bold">a7f3e2</span>
+
+    <span class="a">●</span> Waiting for code in Telegram...</pre>
+      </div>
+    </div>
+    <div class="side-tg">
+      <div class="tg">
+        <div class="tg-h"><div class="tg-av">B</div><div class="tg-n">My Beefy Bot</div></div>
+        <div class="tg-b">
+          <div class="tg-m tg-out">a7f3e2<div class="tg-tr">14:20</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note">Setup blocks until pairing completes. No skip — pairing is required. Ctrl+C to abort; run <code>beefy telegram setup</code> again later.</p>
+
+  <div class="sa">↓</div>
+  <div class="tl">Screen 3 — Paired, notification settings <span class="mt mt-c">Console</span></div>
+  <div class="side">
+    <div class="side-term">
+      <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Set up Telegram notifications</span>
+
+    <span class="g">✓</span> Token saved to hive
+    <span class="g">✓</span> Paired with <span class="w">@mike</span>
+
+<span class="gr">  When an agent is waiting for your input or needs</span>
+<span class="gr">  permission, you'll get a Telegram message after:</span>
+
+    Notify after: <span class="w">2m</span>
+
+  Change? <span class="d">(Enter to keep, or type new: 30s, 2m, 5m)</span>
+  <span class="a">▸</span> <span class="d">█</span>
+
+    <span class="d">You can always change this later:</span>
+    <span class="d">beefy notify set delay &lt;duration&gt;</span></pre>
+      </div>
+    </div>
+    <div class="side-tg">
+      <div class="tg">
+        <div class="tg-h"><div class="tg-av">B</div><div class="tg-n">My Beefy Bot</div></div>
+        <div class="tg-b">
+          <div class="tg-m tg-out">a7f3e2<div class="tg-tr">14:20</div></div>
+          <div class="tg-m tg-in" style="max-width:260px"><span class="g">✓</span> <b>Paired!</b> Notifications from <b>hive</b> will appear here.<div class="tg-hint">Mute: beefy notify pause<br>Remove: beefy telegram rm</div><div class="tg-t">14:20</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sa">↓ press Enter</div>
+  <div class="tl">Screen 4 — Done <span class="mt mt-c">Console</span></div>
+  <div class="side">
+    <div class="side-term">
+      <div class="t">
+<pre class="c"><span class="w" style="font-weight:bold">  Set up Telegram notifications</span>
+
+    <span class="g">✓</span> Token saved to hive
+    <span class="g">✓</span> Paired with <span class="w">@mike</span>
+    <span class="g">✓</span> Notify after: <span class="w">2m</span>
+    <span class="g">✓</span> Test notification sent — check Telegram
+
+  <span class="g">Notifications active.</span> Agents on hive will
+  ping you when they need attention.</pre>
+      </div>
+    </div>
+    <div class="side-tg">
+      <div class="tg">
+        <div class="tg-h"><div class="tg-av">B</div><div class="tg-n">My Beefy Bot</div></div>
+        <div class="tg-b">
+          <div class="tg-m tg-in" style="max-width:260px">🔔 <b>Test notification</b><div style="margin-top:3px;color:#999;font-size:10px;">If you see this, notifications are working.</div><div class="tg-t">14:21</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ SETUP — ALREADY CONFIGURED ═══ -->
+  <div class="dv"></div>
+  <h3>Setup — already configured <span class="mt mt-c">Console</span></h3>
+  <div class="t">
+<pre class="c"><span class="d">$</span> <span class="w">beefy telegram setup</span>
+  <span class="a">⚠ Telegram already configured on hive (paired with @mike)</span>
+  Reconfigure? <span class="d">[y/N]</span> <span class="d">█</span></pre>
+  </div>
+
+  <!-- ═══ SETUP — SCRIPTING ═══ -->
+  <div class="dv"></div>
+  <h3>Scripting — non-interactive</h3>
+  <div class="tl">Save token + get code</div>
+  <div class="t">
+<pre class="c"><span class="d">$</span> <span class="w">beefy telegram setup --token 7891234567:AAH_xxxx</span>
+  <span class="g">✓</span> Token saved to hive
+  Pairing code: <span class="a">a7f3e2</span>
+  Send this code to your bot, then run:
+  <span class="d">beefy telegram pair a7f3e2</span></pre>
+  </div>
+  <div class="tl">Pair after sending the code</div>
+  <div class="t">
+<pre class="c"><span class="d">$</span> <span class="w">beefy telegram pair a7f3e2</span>
+  <span class="g">✓</span> Paired with <span class="w">@mike</span> (chat 412587349)
+  <span class="g">✓</span> Test notification sent</pre>
+  </div>
+
+  <!-- ═══ NOTIFICATIONS IN ACTION ═══ -->
+  <div class="dv"></div>
+  <h3>Notifications — what arrives on your phone</h3>
+  <p class="sub">Each notification is a separate message. Reply to respond. Tap buttons to approve/deny.</p>
+
+  <div class="tl">Waiting for input — user replies with text</div>
+  <div class="tg" style="max-width:340px">
+    <div class="tg-h"><div class="tg-av">B</div><div class="tg-n">My Beefy Bot</div></div>
+    <div class="tg-b">
+      <div class="tg-m tg-in" style="max-width:280px">
+        <div style="font-weight:600">🟡 test-fixer <span style="color:#888;font-weight:400">needs your input</span></div>
+        <div style="margin-top:6px;padding:6px 8px;background:#1a1a1a;border:1px solid #333;border-radius:6px;color:#ccc;font-style:italic;font-size:11px">"Should I refactor the auth module or just fix the failing test?"</div>
+        <div class="tg-hint">↩ Reply to this message to respond</div>
+        <div class="tg-t">14:32 · hive</div>
+      </div>
+      <div class="tg-m tg-out" style="max-width:280px">
+        <div class="tg-q">🟡 test-fixer needs your input</div>
+        Just fix the failing test
+        <div class="tg-tr">14:33</div>
+      </div>
+      <div class="tg-m tg-in">
+        <span class="g">✓</span> Reply sent to <b>test-fixer</b>
+        <div class="tg-t">14:33</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tl">Waiting for permission — inline buttons (approve)</div>
+  <div class="tg" style="max-width:340px">
+    <div class="tg-h"><div class="tg-av">B</div><div class="tg-n">My Beefy Bot</div></div>
+    <div class="tg-b">
+      <div class="tg-m tg-in" style="max-width:280px">
+        <div style="font-weight:600">🟡 deployer <span style="color:#888;font-weight:400">needs permission</span></div>
+        <div class="tg-tool">Run database migration on production?</div>
+        <div class="tg-btns">
+          <div class="tg-btn tg-btn-approve tg-btn-active">Approve</div>
+          <div class="tg-btn tg-btn-deny tg-btn-pressed">Deny</div>
+        </div>
+        <div class="tg-t">14:35 · hive</div>
+      </div>
+      <div class="tg-m tg-in">
+        <span class="g">✓</span> Permission approved for <b>deployer</b>
+        <div class="tg-t">14:35</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tl">Waiting for permission — inline buttons (deny)</div>
+  <div class="tg" style="max-width:340px">
+    <div class="tg-h"><div class="tg-av">B</div><div class="tg-n">My Beefy Bot</div></div>
+    <div class="tg-b">
+      <div class="tg-m tg-in" style="max-width:280px">
+        <div style="font-weight:600">🟡 backend <span style="color:#888;font-weight:400">needs permission</span></div>
+        <div class="tg-tool">Bash: docker compose down &amp;&amp; docker compose up -d</div>
+        <div class="tg-btns">
+          <div class="tg-btn tg-btn-approve tg-btn-pressed">Approve</div>
+          <div class="tg-btn tg-btn-deny tg-btn-active-deny">Deny</div>
+        </div>
+        <div class="tg-t">14:40 · hive</div>
+      </div>
+      <div class="tg-m tg-in">
+        <span class="r">✗</span> Permission denied for <b>backend</b>
+        <div class="tg-t">14:40</div>
+      </div>
+    </div>
+  </div>
+  <p class="note">Approve/Deny use Telegram <b>inline keyboard buttons</b> (callback queries). Approve uses brand gold (<code>#d29922</code>) as the primary action. Deny is muted gray until tapped. After tap, the pressed button highlights, the other dims.</p>
+
+  <!-- ═══ EDGE CASES ═══ -->
+  <div class="dv"></div>
+  <h3>Edge cases</h3>
+
+  <div class="tl">Agent state changed before user acted</div>
+  <div class="tg" style="max-width:340px">
+    <div class="tg-h"><div class="tg-av">B</div><div class="tg-n">My Beefy Bot</div></div>
+    <div class="tg-b">
+      <div class="tg-m tg-in" style="max-width:280px">
+        <div style="font-weight:600">🟡 auth <span style="color:#888;font-weight:400">needs your input</span></div>
+        <div style="margin-top:6px;padding:6px 8px;background:#1a1a1a;border:1px solid #333;border-radius:6px;color:#ccc;font-style:italic;font-size:11px">"Should I update the database migration?"</div>
+        <div class="tg-hint">↩ Reply to this message to respond</div>
+        <div class="tg-t">14:45 · hive</div>
+      </div>
+      <div class="tg-m tg-out" style="max-width:260px">
+        <div class="tg-q">🟡 auth needs your input</div>
+        Yes go ahead
+        <div class="tg-tr">15:02</div>
+      </div>
+      <div class="tg-m tg-in" style="max-width:260px">
+        <span style="color:#d29922">⚠</span> <b>auth</b> is no longer waiting <span style="color:#888">(now: running)</span>
+        <div class="tg-t">15:02</div>
+      </div>
+    </div>
+  </div>
+  <p class="note">Agent was unblocked from TUI/CLI between notification and reply. Bot informs instead of forwarding stale reply.</p>
+
+  <div class="tl">Message not a reply to a notification</div>
+  <div class="tg" style="max-width:340px">
+    <div class="tg-h"><div class="tg-av">B</div><div class="tg-n">My Beefy Bot</div></div>
+    <div class="tg-b">
+      <div class="tg-m tg-out">Hey what's going on?<div class="tg-tr">16:10</div></div>
+      <div class="tg-m tg-in" style="max-width:260px">
+        Reply to a notification to respond to an agent.<div class="tg-hint">Check status: beefy ls</div>
+        <div class="tg-t">16:10</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tl">Unknown user messages the bot</div>
+  <div class="tg" style="max-width:340px">
+    <div class="tg-h"><div class="tg-av">B</div><div class="tg-n">My Beefy Bot</div></div>
+    <div class="tg-b">
+      <div class="tg-m tg-out">/start<div class="tg-tr">16:30</div></div>
+      <div style="padding:6px 10px;font-size:10px;color:#555;font-style:italic">No response — silently ignored</div>
+    </div>
+  </div>
+  <p class="note">Only the paired <code>chat_id</code> receives responses. Unknown users are silently ignored.</p>
+
+  <!-- ═══ NOTIFICATION LOGIC ═══ -->
+  <div class="dv"></div>
+  <h3>Notification logic</h3>
+  <div class="fb">
+    <div class="s"><b>Trigger states:</b> <code>waiting_input</code>, <code>waiting_permission</code> only (v0).</div>
+    <div class="ar">↓</div>
+    <div class="s"><b>Delay:</b> Agent enters trigger state → daemon starts timer for <code>notify_delay_secs</code>.</div>
+    <div class="ar">↓</div>
+    <div class="s"><b>Suppress if:</b> Agent state changes during delay, OR user acts from TUI/CLI during delay.</div>
+    <div class="ar">↓</div>
+    <div class="s"><b>Fire if:</b> Timer expires AND agent still waiting AND no client activity since state change.</div>
+    <div class="ar">↓</div>
+    <div class="s"><b>Dedup:</b> Once fired for agent+state, don't re-fire until state changes and returns.</div>
+  </div>
+  <div class="fb">
+    <div class="s"><b>Reply routing:</b> User replies to a specific notification (Telegram reply-to). Daemon maps <code>message_id</code> → <code>agent_id</code>.</div>
+    <div class="s" style="margin-top:6px"><b>Text reply</b> → <code>SendReply</code> RPC. <b>Approve button</b> (callback query) → <code>ApprovePermission</code> RPC. <b>Deny button</b> → <code>DenyPermission</code> RPC.</div>
+    <div class="s" style="margin-top:6px"><b>Stale reply:</b> If agent state changed, bot sends ⚠ instead of forwarding.</div>
+    <div class="s" style="margin-top:6px"><b>Not a reply:</b> Free text without reply-to gets a hint message.</div>
+    <div class="s" style="margin-top:6px"><b>Security:</b> Only paired <code>chat_id</code> receives responses. Unknown users silently ignored.</div>
+  </div>
+
+  <!-- ═══ DAEMON CONFIG ═══ -->
+  <div class="dv"></div>
+  <h3>Daemon config</h3>
+  <p class="note">Stored on each machine at <code>~/.beefy/config.json</code>. Updated via <code>UpdateConfig</code> gRPC with field mask.</p>
+  <div class="t"><pre class="c"><span class="d">// ~/.beefy/config.json (on remote machine)</span>
+{
+  <span class="bl">"telegram_bot_token"</span>: <span class="g">"7891234567:AAH_xxxx..."</span>,
+  <span class="bl">"telegram_chat_id"</span>:   <span class="g">"412587349"</span>,
+  <span class="bl">"notify_delay_secs"</span>:  <span class="a">120</span>,
+  <span class="bl">"notifications_paused"</span>: <span class="a">false</span>
+}</pre></div>
+  <div class="fb">
+    <div class="s"><b>telegram_bot_token</b> — Bot API token from @BotFather. Provider-specific.</div>
+    <div class="s"><b>telegram_chat_id</b> — Paired Telegram chat ID. Set during setup. Provider-specific.</div>
+    <div class="s"><b>notify_delay_secs</b> — Seconds before notification fires. Default: <b>120</b> (2m). Global — applies to any future provider.</div>
+    <div class="s"><b>notifications_paused</b> — Mute without removing config. Default: <b>false</b>. Global.</div>
+  </div>
+
+</div>
+
+<script>
+function showTab(name) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  event.target.classList.add('active');
+}
+</script>
+</body>
+</html>
